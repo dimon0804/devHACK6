@@ -1,0 +1,31 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "balance": "Balance",
+    "level": "Level",
+    "xp": "XP"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "register": "Register",
+    "login": "Login"
+  },
+  "budget": {
+    "title": "Budget Planning",
+    "income": "Income",
+    "categories": "Categories",
+    "plan": "Plan Budget"
+  },
+  "savings": {
+    "title": "Savings Goals",
+    "createGoal": "Create Goal",
+    "targetAmount": "Target Amount",
+    "currentAmount": "Current Amount"
+  }
+}

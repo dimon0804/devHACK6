@@ -1,0 +1,31 @@
+{
+  "common": {
+    "welcome": "Добро пожаловать",
+    "signIn": "Войти",
+    "signUp": "Регистрация",
+    "logout": "Выйти",
+    "dashboard": "Панель управления",
+    "balance": "Баланс",
+    "level": "Уровень",
+    "xp": "Опыт"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Пароль",
+    "username": "Имя пользователя",
+    "register": "Зарегистрироваться",
+    "login": "Войти"
+  },
+  "budget": {
+    "title": "Планирование бюджета",
+    "income": "Доход",
+    "categories": "Категории",
+    "plan": "Спланировать бюджет"
+  },
+  "savings": {
+    "title": "Цели накоплений",
+    "createGoal": "Создать цель",
+    "targetAmount": "Целевая сумма",
+    "currentAmount": "Текущая сумма"
+  }
+}
