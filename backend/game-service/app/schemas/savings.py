@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from datetime import datetime
 from decimal import Decimal
 
@@ -17,6 +17,10 @@ class GoalResponse(BaseModel):
     completed: bool
     created_at: datetime
 
+    @field_serializer('target_amount', 'current_amount')
+    def serialize_decimal(self, value: Decimal) -> str:
+        return str(value)
+
     class Config:
         from_attributes = True
 
@@ -30,3 +34,7 @@ class SavingsInterestResponse(BaseModel):
     goal_id: int
     interest_amount: Decimal
     new_amount: Decimal
+
+    @field_serializer('interest_amount', 'new_amount')
+    def serialize_decimal(self, value: Decimal) -> str:
+        return str(value)
