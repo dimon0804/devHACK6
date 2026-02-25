@@ -28,9 +28,6 @@
   --card-border: rgba(255, 255, 255, 0.1);
 }
 
-* {
-  @apply border-border;
-}
 
 body {
   @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
