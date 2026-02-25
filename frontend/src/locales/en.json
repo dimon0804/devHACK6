@@ -13,7 +13,15 @@
     "learnFinancialLiteracy": "Learn financial literacy through interactive games",
     "xpToNextLevel": "{{count}} XP to next level",
     "startPlanning": "Start Planning",
-    "manageGoals": "Manage Goals"
+    "manageGoals": "Manage Goals",
+    "back": "Back",
+    "backToDashboard": "← Back to Dashboard",
+    "processing": "Processing...",
+    "success": "Success",
+    "needsImprovement": "Needs Improvement",
+    "xpReward": "XP Reward",
+    "rubles": "₽",
+    "currency": "RUB"
   },
   "auth": {
     "email": "Email",
@@ -34,7 +42,12 @@
     "income": "Income",
     "categories": "Categories",
     "plan": "Plan Budget",
-    "startPlanning": "Start Planning"
+    "startPlanning": "Start Planning",
+    "addCategory": "Add Category",
+    "categoryName": "Category name",
+    "amount": "Amount",
+    "planBudget": "Plan Budget",
+    "feedback": "Feedback"
   },
   "savings": {
     "title": "Savings Goals",
@@ -44,11 +57,44 @@
     "manageGoals": "Manage Goals",
     "goalTitle": "Goal Title",
     "deposit": "Deposit",
-    "completed": "Completed"
+    "completed": "Completed",
+    "depositToGoal": "Deposit to Goal",
+    "depositAmount": "Deposit Amount",
+    "createSavingsGoal": "Create Savings Goal",
+    "noGoals": "You don't have any goals yet",
+    "createFirstGoal": "Create your first goal"
   },
   "dashboard": {
     "title": "Dashboard",
     "budgetPlanning": "Budget Planning",
-    "savingsGoals": "Savings Goals"
+    "savingsGoals": "Savings Goals",
+    "hello": "Hello",
+    "welcomeBack": "Welcome back",
+    "yourBalance": "Your Balance",
+    "financialRating": "Financial Rating",
+    "recentActivity": "Recent Activity"
+  },
+  "about": {
+    "heroTitle": "Financial Literacy for Children",
+    "heroSubtitle": "Learn the basics of finance through interactive games and a safe environment",
+    "startLearning": "Start Learning",
+    "problemTitle": "The Problem",
+    "problemText": "Children don't receive basic financial knowledge in school, leading to financial mistakes in adulthood",
+    "solutionTitle": "The Solution",
+    "solutionText": "A gaming platform that teaches children to manage money, plan budgets, and save for goals",
+    "howItWorks": "How It Works",
+    "step1": "Registration",
+    "step1Text": "Create an account and get a virtual balance",
+    "step2": "Learning",
+    "step2Text": "Complete budget planning and savings scenarios",
+    "step3": "Progress",
+    "step3Text": "Earn XP, level up, and track your progress",
+    "forWhom": "For Whom",
+    "forChildren": "Children",
+    "forChildrenText": "Safe environment for learning finance",
+    "forParents": "Parents",
+    "forParentsText": "Control and support children's learning",
+    "forSchools": "Schools",
+    "forSchoolsText": "Tool for financial literacy lessons"
   }
 }
