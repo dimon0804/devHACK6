@@ -30,7 +30,14 @@ export default function LoginPage() {
       setTokens(access_token, refresh_token)
 
       const userResponse = await api.get('/api/v1/auth/me')
-      setUser(userResponse.data)
+      const userData = userResponse.data
+      // Ensure numeric types
+      setUser({
+        ...userData,
+        balance: Number(userData.balance || 0),
+        level: Number(userData.level || 1),
+        xp: Number(userData.xp || 0),
+      })
 
       router.push('/dashboard')
     } catch (err: any) {

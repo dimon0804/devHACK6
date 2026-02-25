@@ -27,7 +27,14 @@ export default function DashboardPage() {
     const fetchUser = async () => {
       try {
         const response = await api.get('/api/v1/users/me')
-        setUserData(response.data)
+        const data = response.data
+        // Ensure numeric types
+        setUserData({
+          ...data,
+          balance: Number(data.balance || 0),
+          level: Number(data.level || 1),
+          xp: Number(data.xp || 0),
+        })
       } catch {
         logout()
         router.push('/auth/login')
@@ -80,7 +87,7 @@ export default function DashboardPage() {
               Balance
             </h3>
             <p className="text-3xl font-bold text-primary">
-              {userData.balance.toFixed(2)}
+              {Number(userData.balance || 0).toFixed(2)}
             </p>
           </Card>
           <Card>

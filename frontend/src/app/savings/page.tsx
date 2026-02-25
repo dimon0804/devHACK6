@@ -28,7 +28,15 @@ export default function SavingsPage() {
   const fetchGoals = async () => {
     try {
       const response = await api.get('/api/v1/savings/goals')
-      setGoals(response.data)
+      // Ensure numeric types
+      const goals = Array.isArray(response.data) 
+        ? response.data.map((goal: any) => ({
+            ...goal,
+            current_amount: Number(goal.current_amount || 0),
+            target_amount: Number(goal.target_amount || 0),
+          }))
+        : []
+      setGoals(goals)
     } catch (err) {
       console.error('Failed to fetch goals', err)
     } finally {
@@ -112,9 +120,9 @@ export default function SavingsPage() {
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span>
-                      {goal.current_amount.toFixed(2)} / {goal.target_amount.toFixed(2)}
+                      {Number(goal.current_amount || 0).toFixed(2)} / {Number(goal.target_amount || 0).toFixed(2)}
                     </span>
-                    <span>{progress.toFixed(0)}%</span>
+                    <span>{Number(progress || 0).toFixed(0)}%</span>
                   </div>
                   <ProgressBar value={goal.current_amount} max={goal.target_amount} />
                 </div>

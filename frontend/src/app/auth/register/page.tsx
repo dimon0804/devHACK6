@@ -42,7 +42,14 @@ export default function RegisterPage() {
       try {
         const userResponse = await api.get('/api/v1/auth/me')
         if (userResponse.data) {
-          setUser(userResponse.data)
+          const userData = userResponse.data
+          // Ensure numeric types
+          setUser({
+            ...userData,
+            balance: Number(userData.balance || 0),
+            level: Number(userData.level || 1),
+            xp: Number(userData.xp || 0),
+          })
         }
       } catch (userErr: any) {
         console.error('Failed to fetch user info:', userErr)
