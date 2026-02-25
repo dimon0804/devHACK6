@@ -30,8 +30,10 @@ async def create_transaction(
     user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db)
 ):
-    transaction = TransactionService.create_transaction(db, user_id, transaction_data)
-    return transaction
+    transaction_dict = TransactionService.create_transaction(db, user_id, transaction_data)
+    # Convert dict to TransactionResponse
+    from app.schemas.transaction import TransactionResponse
+    return TransactionResponse(**transaction_dict)
 
 
 @router.get("", response_model=TransactionListResponse)
@@ -41,9 +43,12 @@ async def get_transactions(
     user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db)
 ):
-    transactions, total = TransactionService.get_user_transactions(
+    transactions_dict, total = TransactionService.get_user_transactions(
         db, user_id, page, page_size
     )
+    # Convert dicts to TransactionResponse objects
+    from app.schemas.transaction import TransactionResponse
+    transactions = [TransactionResponse(**tx) for tx in transactions_dict]
     return {
         "transactions": transactions,
         "total": total,

@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from fastapi import HTTPException, status
-from app.models.transaction import Transaction
 from app.schemas.transaction import TransactionCreate
 from typing import Tuple
 
@@ -12,7 +11,7 @@ class TransactionService:
         db: Session,
         user_id: int,
         transaction_data: TransactionCreate
-    ) -> Transaction:
+    ) -> dict:
         try:
             print(f"Creating transaction for user {user_id}: type={transaction_data.type}, amount={transaction_data.amount}")
             # Use raw SQL to insert transaction to avoid SQLAlchemy foreign key validation
@@ -35,18 +34,25 @@ class TransactionService:
             row = result.fetchone()
             db.commit()
             
-            # Create Transaction object from row
+            # Return dict instead of ORM object to avoid SQLAlchemy validation
             from datetime import datetime
-            transaction = Transaction(
-                id=row[0],
-                user_id=row[1],
-                type=row[2],
-                amount=Decimal(str(row[3])),
-                description=row[4],
-                created_at=row[5] if isinstance(row[5], datetime) else datetime.fromisoformat(str(row[5]).replace('Z', '+00:00'))
-            )
-            print(f"Transaction created successfully: id={transaction.id}")
-            return transaction
+            created_at = row[5]
+            if not isinstance(created_at, datetime):
+                try:
+                    created_at = datetime.fromisoformat(str(created_at).replace('Z', '+00:00'))
+                except:
+                    created_at = datetime.now()
+            
+            transaction_dict = {
+                "id": row[0],
+                "user_id": row[1],
+                "type": row[2],
+                "amount": Decimal(str(row[3])),
+                "description": row[4],
+                "created_at": created_at
+            }
+            print(f"Transaction created successfully: id={transaction_dict['id']}")
+            return transaction_dict
         except Exception as e:
             db.rollback()
             print(f"Error creating transaction: {e}", exc_info=True)
@@ -61,7 +67,7 @@ class TransactionService:
         user_id: int,
         page: int = 1,
         page_size: int = 20
-    ) -> Tuple[list[Transaction], int]:
+    ) -> Tuple[list[dict], int]:
         from sqlalchemy import text
         from decimal import Decimal
         from datetime import datetime
@@ -86,15 +92,23 @@ class TransactionService:
         )
         total = total_result.scalar()
         
+        # Return dictionaries instead of ORM objects to avoid SQLAlchemy validation
         transactions = []
         for row in transactions_result:
-            transactions.append(Transaction(
-                id=row[0],
-                user_id=row[1],
-                type=row[2],
-                amount=Decimal(str(row[3])),
-                description=row[4],
-                created_at=row[5] if isinstance(row[5], datetime) else datetime.fromisoformat(str(row[5]).replace('Z', '+00:00'))
-            ))
+            created_at = row[5]
+            if not isinstance(created_at, datetime):
+                try:
+                    created_at = datetime.fromisoformat(str(created_at).replace('Z', '+00:00'))
+                except:
+                    created_at = datetime.now()
+            
+            transactions.append({
+                "id": row[0],
+                "user_id": row[1],
+                "type": row[2],
+                "amount": Decimal(str(row[3])),
+                "description": row[4],
+                "created_at": created_at
+            })
 
         return transactions, total
