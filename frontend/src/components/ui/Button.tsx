@@ -1,8 +1,8 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react'
 import { clsx } from 'clsx'
-import { motion } from 'framer-motion'
+import { motion, HTMLMotionProps } from 'framer-motion'
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   variant?: 'primary' | 'secondary' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   children: ReactNode
