@@ -12,7 +12,6 @@ import {
   Users,
   GraduationCap,
   Heart,
-  ArrowRight,
   CheckCircle,
 } from 'lucide-react'
 
@@ -91,15 +90,14 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Button
-              size="lg"
-              variant="primary"
-              onClick={() => router.push('/auth/register')}
-              className="text-lg px-8 py-4"
-            >
-              {t('about.startLearning')}
-              <ArrowRight size={20} className="ml-2" />
-            </Button>
+              <Button
+                size="lg"
+                variant="primary"
+                onClick={() => router.push('/auth/register')}
+                className="text-lg px-8 py-4"
+              >
+                {t('about.startLearning')}
+              </Button>
           </motion.div>
         </div>
       </section>
@@ -254,7 +252,6 @@ export default function AboutPage() {
                 onClick={() => router.push('/auth/register')}
               >
                 {t('about.startLearning')}
-                <ArrowRight size={20} className="ml-2" />
               </Button>
             </Card>
           </motion.div>

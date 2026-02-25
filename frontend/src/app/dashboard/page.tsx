@@ -14,7 +14,7 @@ import { AnimatedCounter } from '@/components/ui/AnimatedCounter'
 import { Badge } from '@/components/ui/Badge'
 import { Footer } from '@/components/layout/Footer'
 import { useTheme } from 'next-themes'
-import { Moon, Sun, Globe, TrendingUp, Target, ArrowRight } from 'lucide-react'
+import { Moon, Sun, Globe, TrendingUp, Target } from 'lucide-react'
 import { formatBalanceNumber, toNumber } from '@/lib/utils'
 
 const containerVariants = {
@@ -234,7 +234,6 @@ export default function DashboardPage() {
                   </p>
                   <Button variant="primary" size="sm" className="group-hover:scale-105 transition-transform">
                     {t('common.startPlanning')}
-                    <ArrowRight size={16} className="ml-2" />
                   </Button>
                 </div>
               </div>
@@ -254,7 +253,6 @@ export default function DashboardPage() {
                   </p>
                   <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
                     {t('common.manageGoals')}
-                    <ArrowRight size={16} className="ml-2" />
                   </Button>
                 </div>
               </div>

@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Footer } from '@/components/layout/Footer'
 import {
-  ArrowRight,
   Info,
   Target,
   TrendingUp,
@@ -125,7 +124,6 @@ export default function Home() {
                   className="text-lg px-8 py-4"
                 >
                   Начать бесплатно
-                  <ArrowRight size={20} className="ml-2" />
                 </Button>
                 <Button
                   size="lg"
@@ -313,7 +311,6 @@ export default function Home() {
                     onClick={() => router.push('/auth/register')}
                   >
                     Создать аккаунт
-                    <ArrowRight size={20} className="ml-2" />
                   </Button>
                   <Button
                     size="lg"

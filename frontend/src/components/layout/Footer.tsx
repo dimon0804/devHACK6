@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Mail, HelpCircle, FileText, Shield, FileCheck } from 'lucide-react'
+import { Mail, HelpCircle, FileText, Shield, FileCheck, ExternalLink } from 'lucide-react'
 
 export function Footer() {
   const { t } = useTranslation()
@@ -27,9 +27,9 @@ export function Footer() {
   return (
     <footer className="relative mt-auto border-t border-[var(--card-border)] bg-[var(--bg-secondary)]/50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
-          <div>
+          <div className="md:col-span-2">
             <motion.h3
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -41,9 +41,28 @@ export function Footer() {
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               {t('footer.tagline')}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-500 mb-4">
               © {currentYear} FinTeen. {t('footer.rights')}
             </p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="mt-4"
+            >
+              <p className="text-xs text-gray-500 dark:text-gray-500 mb-2">
+                Разработано командой
+              </p>
+              <a
+                href="https://clv-digital.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-600 transition-colors"
+              >
+                CLV-DIGITAL
+                <ExternalLink size={14} />
+              </a>
+            </motion.div>
           </div>
 
           {/* Legal */}

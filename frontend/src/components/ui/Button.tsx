@@ -16,16 +16,16 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const baseStyles = 'font-semibold rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2'
+  const baseStyles = 'font-semibold rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
   
   const variants = {
-    primary: 'bg-primary text-white hover:bg-primary-600 focus:ring-primary/50 shadow-lg hover:shadow-glow active:scale-95',
-    secondary: 'bg-secondary/20 text-gray-900 dark:text-gray-100 hover:bg-secondary/30 focus:ring-secondary/50 border border-secondary/30',
+    primary: 'bg-gradient-to-r from-primary to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 focus:ring-primary/50 shadow-lg hover:shadow-glow active:scale-95',
+    secondary: 'bg-secondary/20 text-gray-900 dark:text-gray-100 hover:bg-secondary/30 focus:ring-secondary/50 border border-secondary/30 hover:border-secondary/50',
     ghost: 'bg-transparent hover:bg-gray-100/50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300',
   }
   
   const sizes = {
-    sm: 'px-4 py-2 text-sm',
+    sm: 'px-5 py-2.5 text-sm',
     md: 'px-6 py-3 text-base',
     lg: 'px-8 py-4 text-lg',
   }
@@ -38,7 +38,6 @@ export function Button({
         baseStyles,
         variants[variant],
         sizes[size],
-        disabled && 'opacity-50 cursor-not-allowed',
         className
       )}
       disabled={disabled}
