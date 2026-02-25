@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion, useSpring, useTransform } from 'framer-motion'
+import { motion, useSpring, useMotionValueEvent } from 'framer-motion'
 
 interface AnimatedCounterProps {
   value: number
@@ -21,13 +21,15 @@ export function AnimatedCounter({
   className = '',
 }: AnimatedCounterProps) {
   const spring = useSpring(0, { duration: duration * 1000 })
-  const display = useTransform(spring, (current) =>
-    current.toFixed(decimals)
-  )
+  const [display, setDisplay] = useState('0')
 
   useEffect(() => {
     spring.set(value)
   }, [spring, value])
+
+  useMotionValueEvent(spring, 'change', (latest) => {
+    setDisplay(latest.toFixed(decimals))
+  })
 
   return (
     <motion.span className={className}>
