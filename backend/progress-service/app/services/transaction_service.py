@@ -62,11 +62,39 @@ class TransactionService:
         page: int = 1,
         page_size: int = 20
     ) -> Tuple[list[Transaction], int]:
+        from sqlalchemy import text
+        from decimal import Decimal
+        from datetime import datetime
+        
         offset = (page - 1) * page_size
-        transactions = db.query(Transaction).filter(
-            Transaction.user_id == user_id
-        ).order_by(desc(Transaction.created_at)).offset(offset).limit(page_size).all()
-
-        total = db.query(Transaction).filter(Transaction.user_id == user_id).count()
+        
+        # Use raw SQL to avoid SQLAlchemy foreign key validation
+        transactions_result = db.execute(
+            text("""
+                SELECT id, user_id, type, amount, description, created_at
+                FROM transactions
+                WHERE user_id = :user_id
+                ORDER BY created_at DESC
+                LIMIT :limit OFFSET :offset
+            """),
+            {"user_id": user_id, "limit": page_size, "offset": offset}
+        )
+        
+        total_result = db.execute(
+            text("SELECT COUNT(*) FROM transactions WHERE user_id = :user_id"),
+            {"user_id": user_id}
+        )
+        total = total_result.scalar()
+        
+        transactions = []
+        for row in transactions_result:
+            transactions.append(Transaction(
+                id=row[0],
+                user_id=row[1],
+                type=row[2],
+                amount=Decimal(str(row[3])),
+                description=row[4],
+                created_at=row[5] if isinstance(row[5], datetime) else datetime.fromisoformat(str(row[5]).replace('Z', '+00:00'))
+            ))
 
         return transactions, total
