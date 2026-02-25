@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, DateTime
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 
@@ -8,7 +7,8 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", use_alter=True), nullable=False, index=True)
+    # Foreign key is handled at database level, not at ORM level to avoid initialization issues
+    user_id = Column(Integer, nullable=False, index=True)
     type = Column(String, nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
     description = Column(String, nullable=True)
