@@ -28,11 +28,26 @@ export default function RegisterPage() {
         password,
       })
 
+      if (!response.data) {
+        throw new Error('No data in response')
+      }
+
       const { access_token, refresh_token } = response.data
+      if (!access_token || !refresh_token) {
+        throw new Error('Missing tokens in response')
+      }
+
       setTokens(access_token, refresh_token)
 
-      const userResponse = await api.get('/api/v1/auth/me')
-      setUser(userResponse.data)
+      try {
+        const userResponse = await api.get('/api/v1/auth/me')
+        if (userResponse.data) {
+          setUser(userResponse.data)
+        }
+      } catch (userErr: any) {
+        console.error('Failed to fetch user info:', userErr)
+        // Continue anyway - user is registered
+      }
 
       router.push('/dashboard')
     } catch (err: any) {
