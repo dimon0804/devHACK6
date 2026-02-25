@@ -13,16 +13,23 @@ class SavingsService:
 
     @staticmethod
     def create_goal(db: Session, user_id: int, goal_data: GoalCreate) -> Goal:
-        goal = Goal(
-            user_id=user_id,
-            title=goal_data.title,
-            target_amount=goal_data.target_amount,
-            current_amount=Decimal("0.00")
-        )
-        db.add(goal)
-        db.commit()
-        db.refresh(goal)
-        return goal
+        try:
+            goal = Goal(
+                user_id=user_id,
+                title=goal_data.title,
+                target_amount=goal_data.target_amount,
+                current_amount=Decimal("0.00")
+            )
+            db.add(goal)
+            db.commit()
+            db.refresh(goal)
+            return goal
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to create goal: {str(e)}"
+            )
 
     @staticmethod
     def get_user_goals(db: Session, user_id: int) -> list[Goal]:
