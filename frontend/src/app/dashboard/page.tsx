@@ -96,7 +96,7 @@ export default function DashboardPage() {
               Balance
             </h3>
             <p className="text-3xl font-bold text-primary">
-              {Number(userData.balance || 0).toFixed(2)}
+              ${typeof userData.balance === 'number' ? userData.balance.toFixed(2) : Number(userData.balance || 0).toFixed(2)}
             </p>
           </Card>
           <Card>
