@@ -38,6 +38,7 @@ export default function HistoryPage() {
 
   useEffect(() => {
     fetchTransactions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filter])
 
   const fetchTransactions = async () => {
