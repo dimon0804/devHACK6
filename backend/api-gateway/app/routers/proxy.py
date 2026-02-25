@@ -28,7 +28,10 @@ async def proxy_request(service: str, path: str, request: Request):
         )
 
     base_url = SERVICE_ROUTES[service]
-    url = f"{base_url}/api/v1/{path}" if path else f"{base_url}/api/v1/{service}"
+    if path:
+        url = f"{base_url}/api/v1/{service}/{path}"
+    else:
+        url = f"{base_url}/api/v1/{service}"
 
     headers = dict(request.headers)
     headers.pop("host", None)
