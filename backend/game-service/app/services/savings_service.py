@@ -84,20 +84,24 @@ class SavingsService:
 
                 # Create transaction for deposit
                 try:
+                    transaction_url = f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions"
+                    transaction_payload = {
+                        "type": "savings_deposit",
+                        "amount": str(-deposit_data.amount),
+                        "description": f"Пополнение цели: {goal.title}"
+                    }
+                    print(f"Creating transaction: {transaction_url} with payload: {transaction_payload}")
                     transaction_response = await client.post(
-                        f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                        transaction_url,
                         headers={"Authorization": f"Bearer {token}"},
-                        json={
-                            "type": "savings_deposit",
-                            "amount": str(-deposit_data.amount),
-                            "description": f"Пополнение цели: {goal.title}"
-                        },
+                        json=transaction_payload,
                         timeout=5.0
                     )
+                    print(f"Transaction response: {transaction_response.status_code}, {transaction_response.text}")
                     if transaction_response.status_code != 201:
-                        print(f"Failed to create transaction: {transaction_response.status_code}")
+                        print(f"Failed to create transaction: {transaction_response.status_code}, {transaction_response.text}")
                 except Exception as tx_error:
-                    print(f"Error creating transaction: {tx_error}")
+                    print(f"Error creating transaction: {tx_error}", exc_info=True)
                     # Don't fail the deposit if transaction creation fails
             except httpx.RequestError as e:
                 raise HTTPException(

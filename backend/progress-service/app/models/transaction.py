@@ -8,7 +8,7 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", use_alter=True), nullable=False, index=True)
     type = Column(String, nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
     description = Column(String, nullable=True)
