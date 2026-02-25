@@ -116,13 +116,17 @@ export default function DashboardPage() {
       <nav className="glass border-b border-[var(--card-border)] sticky top-0 z-50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <motion.h1
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-xl font-bold bg-gradient-to-r from-primary to-primary-400 bg-clip-text text-transparent"
             >
-              {t('common.fintechEducation')}
-            </motion.h1>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary-400 bg-clip-text text-transparent">
+                {t('common.fintechEducation')}
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t('common.tagline')}
+              </p>
+            </motion.div>
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"

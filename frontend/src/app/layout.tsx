@@ -3,12 +3,13 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { I18nProvider } from '@/components/providers/I18nProvider'
+import { CookieConsent } from '@/components/layout/CookieConsent'
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] })
 
 export const metadata: Metadata = {
-  title: 'FinTech Education Platform',
-  description: 'Financial literacy platform for children',
+  title: 'FinTeen - Твоя первая финансовая стратегия',
+  description: 'Платформа для изучения финансовой грамотности для детей через интерактивные игры',
 }
 
 export default function RootLayout({
@@ -22,6 +23,7 @@ export default function RootLayout({
         <ThemeProvider>
           <I18nProvider>
             {children}
+            <CookieConsent />
           </I18nProvider>
         </ThemeProvider>
       </body>

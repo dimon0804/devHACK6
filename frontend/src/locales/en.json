@@ -9,7 +9,8 @@
     "level": "Level",
     "xp": "XP",
     "loading": "Loading...",
-    "fintechEducation": "FinTech Education",
+    "fintechEducation": "FinTeen",
+    "tagline": "Your First Financial Strategy",
     "learnFinancialLiteracy": "Learn financial literacy through interactive games",
     "xpToNextLevel": "{{count}} XP to next level",
     "startPlanning": "Start Planning",
@@ -102,5 +103,22 @@
     "ctaTitle": "Ready to start learning?",
     "ctaText": "Join thousands of children already learning financial literacy",
     "aboutPlatform": "About Platform"
+  },
+  "footer": {
+    "about": "About",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "offer": "Public Offer",
+    "contact": "Contact",
+    "support": "Support",
+    "rights": "All rights reserved",
+    "tagline": "Your First Financial Strategy"
+  },
+  "cookies": {
+    "title": "Cookie Usage",
+    "text": "We use cookies to improve site functionality and personalize content",
+    "accept": "Accept",
+    "decline": "Decline",
+    "learnMore": "Learn More"
   }
 }
