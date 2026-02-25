@@ -94,7 +94,7 @@ export default function TermsOfServicePage() {
                 <section className="mb-8">
                   <h2 className="text-2xl font-bold mb-4">6. Ответственность</h2>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Платформа предоставляется "как есть". Мы не несем ответственности за возможные убытки, связанные с использованием платформы.
+                    Платформа предоставляется &quot;как есть&quot;. Мы не несем ответственности за возможные убытки, связанные с использованием платформы.
                   </p>
                 </section>
               </div>
