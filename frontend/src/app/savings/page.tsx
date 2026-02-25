@@ -11,6 +11,7 @@ import { Modal } from '@/components/ui/Modal'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { CircularProgress } from '@/components/ui/CircularProgress'
 import { Badge } from '@/components/ui/Badge'
+import { Footer } from '@/components/layout/Footer'
 import { ArrowLeft, Plus, Target, TrendingUp } from 'lucide-react'
 import { formatBalanceNumber, toNumber } from '@/lib/utils'
 
@@ -321,6 +322,7 @@ export default function SavingsPage() {
           </Button>
         </form>
       </Modal>
+      <Footer />
     </main>
   )
 }

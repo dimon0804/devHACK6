@@ -23,7 +23,7 @@ const fadeInUp = {
 
 export default function AboutPage() {
   const router = useRouter()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const steps = [
     {

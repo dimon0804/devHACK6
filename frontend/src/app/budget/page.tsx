@@ -8,6 +8,7 @@ import api from '@/lib/api'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Footer } from '@/components/layout/Footer'
 import { ArrowLeft, Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function BudgetPage() {
@@ -227,6 +228,7 @@ export default function BudgetPage() {
           </Card>
         </motion.div>
       </div>
+      <Footer />
     </main>
   )
 }
