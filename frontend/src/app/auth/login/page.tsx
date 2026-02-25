@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Footer } from '@/components/layout/Footer'
 import { toNumber } from '@/lib/utils'
 
 export default function LoginPage() {
@@ -53,49 +54,52 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-      <Card className="max-w-md w-full p-8">
-        <h1 className="text-3xl font-bold text-center mb-6 text-primary">
-          {t('auth.signIn')}
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-            />
-          </div>
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? t('common.loading') : t('auth.signIn')}
-          </Button>
-        </form>
-        <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
-          {t('auth.dontHaveAccount')}{' '}
-          <button
-            onClick={() => router.push('/auth/register')}
-            className="text-primary hover:underline"
-          >
-            {t('common.signUp')}
-          </button>
-        </p>
-      </Card>
-    </main>
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+        <Card className="max-w-md w-full p-8">
+          <h1 className="text-3xl font-bold text-center mb-6 text-primary">
+            {t('auth.signIn')}
+          </h1>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              />
+            </div>
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? t('common.loading') : t('auth.signIn')}
+            </Button>
+          </form>
+          <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+            {t('auth.dontHaveAccount')}{' '}
+            <button
+              onClick={() => router.push('/auth/register')}
+              className="text-primary hover:underline"
+            >
+              {t('common.signUp')}
+            </button>
+          </p>
+        </Card>
+      </main>
+      <Footer />
+    </div>
   )
 }

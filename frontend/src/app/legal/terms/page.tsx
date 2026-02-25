@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { ArrowLeft, FileText } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Footer } from '@/components/layout/Footer'
 
@@ -26,7 +26,6 @@ export default function TermsOfServicePage() {
               onClick={() => router.back()}
               className="mb-6"
             >
-              <ArrowLeft size={18} className="mr-2" />
               Назад
             </Button>
 

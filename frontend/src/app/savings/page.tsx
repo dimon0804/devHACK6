@@ -12,7 +12,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { CircularProgress } from '@/components/ui/CircularProgress'
 import { Badge } from '@/components/ui/Badge'
 import { Footer } from '@/components/layout/Footer'
-import { ArrowLeft, Plus, Target, TrendingUp } from 'lucide-react'
+import { Plus, Target, TrendingUp } from 'lucide-react'
 import { formatBalanceNumber, toNumber } from '@/lib/utils'
 
 export default function SavingsPage() {
@@ -116,7 +116,6 @@ export default function SavingsPage() {
             onClick={() => router.push('/dashboard')}
             className="mb-6"
           >
-            <ArrowLeft size={18} className="mr-2" />
             {t('common.backToDashboard')}
           </Button>
 

@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Footer } from '@/components/layout/Footer'
-import { ArrowLeft, Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function BudgetPage() {
   const router = useRouter()
@@ -80,7 +80,6 @@ export default function BudgetPage() {
             onClick={() => router.push('/dashboard')}
             className="mb-6"
           >
-            <ArrowLeft size={18} className="mr-2" />
             {t('common.backToDashboard')}
           </Button>
 

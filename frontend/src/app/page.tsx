@@ -1,8 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/store/authStore'
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
@@ -26,14 +24,7 @@ const fadeInUp = {
 
 export default function Home() {
   const router = useRouter()
-  const { isAuthenticated } = useAuthStore()
   const { t } = useTranslation()
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/dashboard')
-    }
-  }, [isAuthenticated, router])
 
   const features = [
     {
@@ -130,7 +121,6 @@ export default function Home() {
                   variant="secondary"
                   onClick={() => router.push('/about')}
                 >
-                  <Info size={18} className="mr-2" />
                   Узнать больше
                 </Button>
               </motion.div>

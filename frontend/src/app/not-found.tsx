@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { Home, Search, Smile, TrendingDown } from 'lucide-react'
+import { Search, Smile, TrendingDown } from 'lucide-react'
 
 export default function NotFound() {
   const router = useRouter()
@@ -78,7 +78,6 @@ export default function NotFound() {
                 variant="primary"
                 onClick={() => router.push('/')}
               >
-                <Home size={20} className="mr-2" />
                 Вернуться на главную
               </Button>
               <Button

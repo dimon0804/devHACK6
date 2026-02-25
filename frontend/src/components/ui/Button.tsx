@@ -38,6 +38,7 @@ export function Button({
         baseStyles,
         variants[variant],
         sizes[size],
+        'flex items-center justify-center',
         className
       )}
       disabled={disabled}
