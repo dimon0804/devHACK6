@@ -1,0 +1,210 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fintech_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fintech_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fintech_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-fintech_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - fintech_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fintech_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: fintech_redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - fintech_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: fintech_adminer
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    networks:
+      - fintech_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: fintech_auth_service
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fintech_user}:${POSTGRES_PASSWORD:-fintech_pass}@postgres:5432/${POSTGRES_DB:-fintech_db}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - JWT_REFRESH_TOKEN_EXPIRE_DAYS=${JWT_REFRESH_TOKEN_EXPIRE_DAYS:-7}
+    ports:
+      - "${AUTH_SERVICE_PORT:-8001}:8000"
+    networks:
+      - fintech_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  user-service:
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+    container_name: fintech_user_service
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fintech_user}:${POSTGRES_PASSWORD:-fintech_pass}@postgres:5432/${POSTGRES_DB:-fintech_db}
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth-service:8000
+    ports:
+      - "${USER_SERVICE_PORT:-8002}:8000"
+    networks:
+      - fintech_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  game-service:
+    build:
+      context: ./backend/game-service
+      dockerfile: Dockerfile
+    container_name: fintech_game_service
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fintech_user}:${POSTGRES_PASSWORD:-fintech_pass}@postgres:5432/${POSTGRES_DB:-fintech_db}
+      - REDIS_URL=redis://redis:6379
+      - USER_SERVICE_URL=http://user-service:8000
+      - PROGRESS_SERVICE_URL=http://progress-service:8000
+    ports:
+      - "${GAME_SERVICE_PORT:-8003}:8000"
+    networks:
+      - fintech_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  progress-service:
+    build:
+      context: ./backend/progress-service
+      dockerfile: Dockerfile
+    container_name: fintech_progress_service
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fintech_user}:${POSTGRES_PASSWORD:-fintech_pass}@postgres:5432/${POSTGRES_DB:-fintech_db}
+      - REDIS_URL=redis://redis:6379
+      - USER_SERVICE_URL=http://user-service:8000
+    ports:
+      - "${PROGRESS_SERVICE_PORT:-8004}:8000"
+    networks:
+      - fintech_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: fintech_api_gateway
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - USER_SERVICE_URL=http://user-service:8000
+      - GAME_SERVICE_URL=http://game-service:8000
+      - PROGRESS_SERVICE_URL=http://progress-service:8000
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "${API_GATEWAY_PORT:-8000}:8000"
+    networks:
+      - fintech_network
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      game-service:
+        condition: service_healthy
+      progress-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fintech_frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${API_GATEWAY_PORT:-8000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - fintech_network
+    depends_on:
+      - api-gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  fintech_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
