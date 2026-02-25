@@ -66,7 +66,11 @@
     "createSavingsGoal": "Create Savings Goal",
     "noGoals": "You don't have any goals yet",
     "createFirstGoal": "Create your first goal",
-    "applyInterest": "Apply Interest"
+    "applyInterest": "Apply Interest",
+    "depositFailed": "Failed to deposit",
+    "insufficientBalance": "Insufficient balance",
+    "goalCompleted": "Goal already completed",
+    "invalidAmount": "Please enter a valid amount"
   },
   "dashboard": {
     "title": "Dashboard",
