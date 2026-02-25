@@ -53,20 +53,40 @@ class BudgetService:
                     timeout=5.0
                 )
 
-                transaction_response = await client.post(
-                    f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
-                    headers={"Authorization": f"Bearer {token}"},
-                    json={
-                        "type": "income",
-                        "amount": str(request.income),
-                        "description": "Планирование бюджета"
-                    },
-                    timeout=5.0
-                )
+                # Create transaction - always try to save transaction history
+                try:
+                    transaction_response = await client.post(
+                        f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                        headers={"Authorization": f"Bearer {token}"},
+                        json={
+                            "type": "income",
+                            "amount": str(request.income),
+                            "description": "Планирование бюджета"
+                        },
+                        timeout=5.0
+                    )
+                    if transaction_response.status_code != 201:
+                        print(f"Failed to create transaction: {transaction_response.status_code}")
+                except Exception as tx_error:
+                    print(f"Error creating transaction: {tx_error}")
             except httpx.RequestError as e:
                 # Log error but don't fail the request
-                print(f"Error updating balance/XP/transaction: {e}")
-                pass
+                print(f"Error updating balance/XP: {e}")
+                # Still try to create transaction even if balance/XP update failed
+                try:
+                    async with httpx.AsyncClient() as tx_client:
+                        await tx_client.post(
+                            f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "type": "income",
+                                "amount": str(request.income),
+                                "description": "Планирование бюджета"
+                            },
+                            timeout=5.0
+                        )
+                except Exception as tx_error:
+                    print(f"Error creating transaction after failure: {tx_error}")
 
         return {
             "success": success,

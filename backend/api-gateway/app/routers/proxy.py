@@ -28,10 +28,17 @@ async def proxy_request(service: str, path: str, request: Request):
         )
 
     base_url = SERVICE_ROUTES[service]
-    if path:
-        url = f"{base_url}/api/v1/{service}/{path}"
+    # Special handling for transactions and quests - they're already under /api/v1/transactions
+    if service in ["transactions", "quests"]:
+        if path:
+            url = f"{base_url}/api/v1/{service}/{path}"
+        else:
+            url = f"{base_url}/api/v1/{service}"
     else:
-        url = f"{base_url}/api/v1/{service}"
+        if path:
+            url = f"{base_url}/api/v1/{service}/{path}"
+        else:
+            url = f"{base_url}/api/v1/{service}"
 
     headers = dict(request.headers)
     headers.pop("host", None)

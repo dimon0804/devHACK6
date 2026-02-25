@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from datetime import datetime
 from decimal import Decimal
 
@@ -16,6 +16,10 @@ class TransactionResponse(BaseModel):
     amount: Decimal
     description: str | None
     created_at: datetime
+
+    @field_serializer('amount')
+    def serialize_decimal(self, value: Decimal) -> str:
+        return str(value)
 
     class Config:
         from_attributes = True

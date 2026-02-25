@@ -82,17 +82,24 @@ class SavingsService:
                         detail=error_detail
                     )
 
-                transaction_response = await client.post(
-                    f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
-                    headers={"Authorization": f"Bearer {token}"},
-                    json={
-                        "type": "savings_deposit",
-                        "amount": str(-deposit_data.amount),
-                        "description": f"Deposit to goal: {goal.title}"
-                    },
-                    timeout=5.0
-                )
-            except httpx.RequestError:
+                # Create transaction for deposit
+                try:
+                    transaction_response = await client.post(
+                        f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                        headers={"Authorization": f"Bearer {token}"},
+                        json={
+                            "type": "savings_deposit",
+                            "amount": str(-deposit_data.amount),
+                            "description": f"Пополнение цели: {goal.title}"
+                        },
+                        timeout=5.0
+                    )
+                    if transaction_response.status_code != 201:
+                        print(f"Failed to create transaction: {transaction_response.status_code}")
+                except Exception as tx_error:
+                    print(f"Error creating transaction: {tx_error}")
+                    # Don't fail the deposit if transaction creation fails
+            except httpx.RequestError as e:
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail="Service unavailable"
@@ -112,6 +119,20 @@ class SavingsService:
                         json={"xp": SavingsService.XP_REWARD_GOAL_COMPLETED},
                         timeout=5.0
                     )
+                    # Create transaction for goal completion
+                    try:
+                        await client.post(
+                            f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "type": "goal_completed",
+                                "amount": str(goal.target_amount),
+                                "description": f"Цель достигнута: {goal.title}"
+                            },
+                            timeout=5.0
+                        )
+                    except Exception:
+                        pass
             except httpx.RequestError:
                 pass
 
@@ -137,6 +158,22 @@ class SavingsService:
         interest_amount = goal.current_amount * SavingsService.INTEREST_RATE
         goal.current_amount += interest_amount
 
+        # Create transaction for interest
+        try:
+            async with httpx.AsyncClient() as client:
+                await client.post(
+                    f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                    headers={"Authorization": f"Bearer {token}"},
+                    json={
+                        "type": "interest",
+                        "amount": str(interest_amount),
+                        "description": f"Проценты по цели: {goal.title}"
+                    },
+                    timeout=5.0
+                )
+        except Exception:
+            pass
+
         if goal.current_amount >= goal.target_amount:
             goal.completed = True
             goal.current_amount = goal.target_amount
@@ -149,6 +186,20 @@ class SavingsService:
                         json={"xp": SavingsService.XP_REWARD_GOAL_COMPLETED},
                         timeout=5.0
                     )
+                    # Create transaction for goal completion
+                    try:
+                        await client.post(
+                            f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "type": "goal_completed",
+                                "amount": str(goal.target_amount),
+                                "description": f"Цель достигнута: {goal.title}"
+                            },
+                            timeout=5.0
+                        )
+                    except Exception:
+                        pass
             except httpx.RequestError:
                 pass
 
