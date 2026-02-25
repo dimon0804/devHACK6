@@ -71,7 +71,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-      start_period: 10s
 
   user-service:
     build:
@@ -98,7 +97,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
       start_period: 10s
 
   game-service:
@@ -155,7 +153,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
       start_period: 10s
 
   api-gateway:
