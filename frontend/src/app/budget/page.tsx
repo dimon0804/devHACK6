@@ -68,7 +68,7 @@ export default function BudgetPage() {
   const isBalanced = Math.abs(remaining) < 0.01
 
   return (
-    <main className="min-h-screen py-8">
+    <main className="min-h-screen py-8 pb-32">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -135,7 +135,7 @@ export default function BudgetPage() {
                         onChange={(e) =>
                           updateCategory(index, 'name', e.target.value)
                         }
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all min-w-0"
                       />
                       <input
                         type="number"
@@ -145,7 +145,7 @@ export default function BudgetPage() {
                         onChange={(e) =>
                           updateCategory(index, 'amount', e.target.value)
                         }
-                        className="w-32 px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        className="w-28 sm:w-32 px-3 sm:px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                       />
                       {categories.length > 1 && (
                         <Button

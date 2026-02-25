@@ -104,7 +104,7 @@ export default function SavingsPage() {
   }
 
   return (
-    <main className="min-h-screen py-8 pb-24">
+    <main className="min-h-screen py-8 pb-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -245,9 +245,9 @@ export default function SavingsPage() {
               onClick={() => setIsModalOpen(true)}
               variant="primary"
               size="lg"
-              className="rounded-full w-16 h-16 shadow-glow-lg p-0"
+              className="rounded-full w-16 h-16 shadow-glow-lg p-0 flex items-center justify-center"
             >
-              <Plus size={24} />
+              <Plus size={24} className="text-white" />
             </Button>
           </motion.div>
         </motion.div>
