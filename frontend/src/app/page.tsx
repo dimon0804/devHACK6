@@ -80,7 +80,7 @@ export default function Home() {
                 size="sm"
               >
                 <Info size={16} className="mr-2" />
-                О платформе
+                {t('about.aboutPlatform')}
               </Button>
             </motion.div>
           </Card>

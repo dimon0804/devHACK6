@@ -47,7 +47,9 @@
     "categoryName": "Category name",
     "amount": "Amount",
     "planBudget": "Plan Budget",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "allocated": "Allocated",
+    "remaining": "Remaining"
   },
   "savings": {
     "title": "Savings Goals",
@@ -95,6 +97,9 @@
     "forParents": "Parents",
     "forParentsText": "Control and support children's learning",
     "forSchools": "Schools",
-    "forSchoolsText": "Tool for financial literacy lessons"
+    "forSchoolsText": "Tool for financial literacy lessons",
+    "ctaTitle": "Ready to start learning?",
+    "ctaText": "Join thousands of children already learning financial literacy",
+    "aboutPlatform": "About Platform"
   }
 }

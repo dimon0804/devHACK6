@@ -243,10 +243,10 @@ export default function AboutPage() {
           >
             <Card glow className="text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Готовы начать обучение?
+                {t('about.ctaTitle')}
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-                Присоединяйтесь к тысячам детей, которые уже изучают финансовую грамотность
+                {t('about.ctaText')}
               </p>
               <Button
                 size="lg"
