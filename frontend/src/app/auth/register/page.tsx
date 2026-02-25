@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
 import { Button } from '@/components/ui/Button'
@@ -10,6 +11,7 @@ import { toNumber } from '@/lib/utils'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { t } = useTranslation()
   const { setTokens, setUser } = useAuthStore()
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
@@ -60,7 +62,7 @@ export default function RegisterPage() {
       router.push('/dashboard')
     } catch (err: any) {
       console.error('Registration error:', err)
-      const errorMessage = err.response?.data?.detail || err.message || 'Registration failed'
+      const errorMessage = err.response?.data?.detail || err.message || t('auth.registrationFailed')
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -71,11 +73,11 @@ export default function RegisterPage() {
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
       <Card className="max-w-md w-full p-8">
         <h1 className="text-3xl font-bold text-center mb-6 text-primary">
-          Sign Up
+          {t('auth.signUp')}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
             <input
               type="email"
               value={email}
@@ -85,7 +87,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Username</label>
+            <label className="block text-sm font-medium mb-2">{t('auth.username')}</label>
             <input
               type="text"
               value={username}
@@ -96,7 +98,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
             <input
               type="password"
               value={password}
@@ -110,16 +112,16 @@ export default function RegisterPage() {
             <div className="text-red-500 text-sm text-center">{error}</div>
           )}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Loading...' : 'Sign Up'}
+            {loading ? t('common.loading') : t('auth.register')}
           </Button>
         </form>
         <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <button
             onClick={() => router.push('/auth/login')}
             className="text-primary hover:underline"
           >
-            Sign In
+            {t('common.signIn')}
           </button>
         </p>
       </Card>

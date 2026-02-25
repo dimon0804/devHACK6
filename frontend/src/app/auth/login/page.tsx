@@ -43,7 +43,7 @@ export default function LoginPage() {
       router.push('/dashboard')
     } catch (err: any) {
       console.error('Login error:', err)
-      const errorMessage = err.response?.data?.detail || err.message || 'Login failed'
+      const errorMessage = err.response?.data?.detail || err.message || t('auth.loginFailed')
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -54,11 +54,11 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
       <Card className="max-w-md w-full p-8">
         <h1 className="text-3xl font-bold text-center mb-6 text-primary">
-          Sign In
+          {t('auth.signIn')}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
             <input
               type="email"
               value={email}
@@ -68,7 +68,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
             <input
               type="password"
               value={password}
@@ -81,16 +81,16 @@ export default function LoginPage() {
             <div className="text-red-500 text-sm text-center">{error}</div>
           )}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Loading...' : 'Sign In'}
+            {loading ? t('common.loading') : t('auth.signIn')}
           </Button>
         </form>
         <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
-          Don&apos;t have an account?{' '}
+          {t('auth.dontHaveAccount')}{' '}
           <button
             onClick={() => router.push('/auth/register')}
             className="text-primary hover:underline"
           >
-            Sign Up
+            {t('common.signUp')}
           </button>
         </p>
       </Card>

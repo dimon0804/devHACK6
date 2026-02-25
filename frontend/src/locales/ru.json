@@ -7,25 +7,48 @@
     "dashboard": "Панель управления",
     "balance": "Баланс",
     "level": "Уровень",
-    "xp": "Опыт"
+    "xp": "Опыт",
+    "loading": "Загрузка...",
+    "fintechEducation": "Обучение финансовой грамотности",
+    "learnFinancialLiteracy": "Изучайте финансовую грамотность через интерактивные игры",
+    "xpToNextLevel": "{{count}} XP до следующего уровня",
+    "startPlanning": "Начать планирование",
+    "manageGoals": "Управление целями"
   },
   "auth": {
     "email": "Email",
     "password": "Пароль",
     "username": "Имя пользователя",
     "register": "Зарегистрироваться",
-    "login": "Войти"
+    "login": "Войти",
+    "signIn": "Вход",
+    "signUp": "Регистрация",
+    "dontHaveAccount": "Нет аккаунта?",
+    "alreadyHaveAccount": "Уже есть аккаунт?",
+    "registrationFailed": "Ошибка регистрации",
+    "loginFailed": "Ошибка входа",
+    "incorrectCredentials": "Неверный email или пароль"
   },
   "budget": {
     "title": "Планирование бюджета",
     "income": "Доход",
     "categories": "Категории",
-    "plan": "Спланировать бюджет"
+    "plan": "Спланировать бюджет",
+    "startPlanning": "Начать планирование"
   },
   "savings": {
     "title": "Цели накоплений",
     "createGoal": "Создать цель",
     "targetAmount": "Целевая сумма",
-    "currentAmount": "Текущая сумма"
+    "currentAmount": "Текущая сумма",
+    "manageGoals": "Управление целями",
+    "goalTitle": "Название цели",
+    "deposit": "Пополнить",
+    "completed": "Завершено"
+  },
+  "dashboard": {
+    "title": "Панель управления",
+    "budgetPlanning": "Планирование бюджета",
+    "savingsGoals": "Цели накоплений"
   }
 }

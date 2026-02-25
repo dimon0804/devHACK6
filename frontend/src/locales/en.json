@@ -7,25 +7,48 @@
     "dashboard": "Dashboard",
     "balance": "Balance",
     "level": "Level",
-    "xp": "XP"
+    "xp": "XP",
+    "loading": "Loading...",
+    "fintechEducation": "FinTech Education",
+    "learnFinancialLiteracy": "Learn financial literacy through interactive games",
+    "xpToNextLevel": "{{count}} XP to next level",
+    "startPlanning": "Start Planning",
+    "manageGoals": "Manage Goals"
   },
   "auth": {
     "email": "Email",
     "password": "Password",
     "username": "Username",
     "register": "Register",
-    "login": "Login"
+    "login": "Login",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "registrationFailed": "Registration failed",
+    "loginFailed": "Login failed",
+    "incorrectCredentials": "Incorrect email or password"
   },
   "budget": {
     "title": "Budget Planning",
     "income": "Income",
     "categories": "Categories",
-    "plan": "Plan Budget"
+    "plan": "Plan Budget",
+    "startPlanning": "Start Planning"
   },
   "savings": {
     "title": "Savings Goals",
     "createGoal": "Create Goal",
     "targetAmount": "Target Amount",
-    "currentAmount": "Current Amount"
+    "currentAmount": "Current Amount",
+    "manageGoals": "Manage Goals",
+    "goalTitle": "Goal Title",
+    "deposit": "Deposit",
+    "completed": "Completed"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "budgetPlanning": "Budget Planning",
+    "savingsGoals": "Savings Goals"
   }
 }
