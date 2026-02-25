@@ -64,7 +64,8 @@
     "depositAmount": "Deposit Amount",
     "createSavingsGoal": "Create Savings Goal",
     "noGoals": "You don't have any goals yet",
-    "createFirstGoal": "Create your first goal"
+    "createFirstGoal": "Create your first goal",
+    "applyInterest": "Apply Interest"
   },
   "dashboard": {
     "title": "Dashboard",

@@ -220,7 +220,7 @@ export default function SavingsPage() {
                             size="sm"
                             onClick={() => handleApplyInterest(goal.id)}
                             disabled={goal.completed}
-                            title="Применить проценты"
+                            title={t('savings.applyInterest')}
                           >
                             <TrendingUp size={16} />
                           </Button>

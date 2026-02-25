@@ -170,13 +170,13 @@ export default function BudgetPage() {
                   >
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {t('budget.allocated')}:
+                        {t('budget.allocated')}
                       </span>
                       <span className="font-semibold">{totalAllocated.toFixed(2)} {t('common.rubles')}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {t('budget.remaining')}:
+                        {t('budget.remaining')}
                       </span>
                       <span className={`font-bold ${isBalanced ? 'text-primary' : remaining < 0 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
                         {remaining.toFixed(2)} {t('common.rubles')}

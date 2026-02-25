@@ -64,7 +64,8 @@
     "depositAmount": "Сумма пополнения",
     "createSavingsGoal": "Создать цель накопления",
     "noGoals": "У вас пока нет целей",
-    "createFirstGoal": "Создайте первую цель"
+    "createFirstGoal": "Создайте первую цель",
+    "applyInterest": "Применить проценты"
   },
   "dashboard": {
     "title": "Панель управления",
