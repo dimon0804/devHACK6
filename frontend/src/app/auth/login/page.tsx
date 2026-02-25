@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
 import { Button } from '@/components/ui/Button'
@@ -10,6 +11,7 @@ import { toNumber } from '@/lib/utils'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { t } = useTranslation()
   const { setTokens, setUser } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
