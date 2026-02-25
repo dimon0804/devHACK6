@@ -15,15 +15,36 @@ class TransactionService:
     ) -> Transaction:
         try:
             print(f"Creating transaction for user {user_id}: type={transaction_data.type}, amount={transaction_data.amount}")
-            transaction = Transaction(
-                user_id=user_id,
-                type=transaction_data.type,
-                amount=transaction_data.amount,
-                description=transaction_data.description
+            # Use raw SQL to insert transaction to avoid SQLAlchemy foreign key validation
+            from sqlalchemy import text
+            from decimal import Decimal
+            
+            result = db.execute(
+                text("""
+                    INSERT INTO transactions (user_id, type, amount, description, created_at)
+                    VALUES (:user_id, :type, :amount, :description, NOW())
+                    RETURNING id, user_id, type, amount, description, created_at
+                """),
+                {
+                    "user_id": user_id,
+                    "type": transaction_data.type,
+                    "amount": str(transaction_data.amount),
+                    "description": transaction_data.description
+                }
             )
-            db.add(transaction)
+            row = result.fetchone()
             db.commit()
-            db.refresh(transaction)
+            
+            # Create Transaction object from row
+            from datetime import datetime
+            transaction = Transaction(
+                id=row[0],
+                user_id=row[1],
+                type=row[2],
+                amount=Decimal(str(row[3])),
+                description=row[4],
+                created_at=row[5] if isinstance(row[5], datetime) else datetime.fromisoformat(str(row[5]).replace('Z', '+00:00'))
+            )
             print(f"Transaction created successfully: id={transaction.id}")
             return transaction
         except Exception as e:
