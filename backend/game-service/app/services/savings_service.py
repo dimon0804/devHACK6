@@ -72,9 +72,14 @@ class SavingsService:
                     timeout=5.0
                 )
                 if balance_response.status_code != 200:
+                    try:
+                        error_data = balance_response.json()
+                        error_detail = error_data.get("detail", "Недостаточно средств на балансе")
+                    except:
+                        error_detail = "Недостаточно средств на балансе"
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Insufficient balance"
+                        detail=error_detail
                     )
 
                 transaction_response = await client.post(

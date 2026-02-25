@@ -27,6 +27,7 @@ export default function SavingsPage() {
     goalId: null,
   })
   const [depositAmount, setDepositAmount] = useState('')
+  const [depositError, setDepositError] = useState('')
 
   useEffect(() => {
     fetchGoals()
@@ -69,16 +70,35 @@ export default function SavingsPage() {
     e.preventDefault()
     if (!depositModal.goalId) return
 
+    setDepositError('')
+    const amount = parseFloat(depositAmount)
+    
+    if (isNaN(amount) || amount <= 0) {
+      setDepositError(t('savings.invalidAmount'))
+      return
+    }
+
     try {
       await api.post('/api/v1/savings/deposit', {
         goal_id: depositModal.goalId,
-        amount: parseFloat(depositAmount),
+        amount: amount,
       })
       setDepositModal({ isOpen: false, goalId: null })
       setDepositAmount('')
+      setDepositError('')
       fetchGoals()
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to deposit', err)
+      const errorMessage = err.response?.data?.detail || err.message || t('savings.depositFailed')
+      
+      // Переводим стандартные сообщения об ошибках
+      if (errorMessage.includes('Insufficient balance') || errorMessage.includes('insufficient')) {
+        setDepositError(t('savings.insufficientBalance'))
+      } else if (errorMessage.includes('completed')) {
+        setDepositError(t('savings.goalCompleted'))
+      } else {
+        setDepositError(errorMessage)
+      }
     }
   }
 
@@ -298,7 +318,11 @@ export default function SavingsPage() {
       {/* Deposit Modal */}
       <Modal
         isOpen={depositModal.isOpen}
-        onClose={() => setDepositModal({ isOpen: false, goalId: null })}
+        onClose={() => {
+          setDepositModal({ isOpen: false, goalId: null })
+          setDepositAmount('')
+          setDepositError('')
+        }}
         title={t('savings.depositToGoal')}
       >
         <form onSubmit={handleDeposit} className="space-y-4">
@@ -309,13 +333,22 @@ export default function SavingsPage() {
             <input
               type="number"
               step="0.01"
+              min="0.01"
               value={depositAmount}
-              onChange={(e) => setDepositAmount(e.target.value)}
+              onChange={(e) => {
+                setDepositAmount(e.target.value)
+                setDepositError('')
+              }}
               required
               className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               placeholder="0.00"
             />
           </div>
+          {depositError && (
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-600 dark:text-red-400">{depositError}</p>
+            </div>
+          )}
           <Button type="submit" className="w-full" variant="primary">
             {t('savings.deposit')}
           </Button>
