@@ -54,7 +54,7 @@ class AuthService:
 
     @staticmethod
     def authenticate_user(db: Session, login_data: UserLogin) -> User:
-        user = db.query(User).filter(User.email == login_data.email).first()
+        user = db.query(User).filter(User.email == login_data.email.lower().strip()).first()
 
         if not user:
             raise HTTPException(
@@ -63,7 +63,16 @@ class AuthService:
             )
 
         # Verify password
-        is_valid = verify_password(login_data.password, user.hashed_password)
+        try:
+            is_valid = verify_password(login_data.password, user.hashed_password)
+        except Exception as e:
+            # Log error for debugging but don't expose it to user
+            print(f"Password verification error: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password"
+            )
+
         if not is_valid:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
