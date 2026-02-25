@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { toNumber } from '@/lib/utils'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -34,9 +35,9 @@ export default function LoginPage() {
       // Ensure numeric types
       setUser({
         ...userData,
-        balance: Number(userData.balance || 0),
-        level: Number(userData.level || 1),
-        xp: Number(userData.xp || 0),
+        balance: toNumber(userData.balance, 0),
+        level: toNumber(userData.level, 1),
+        xp: toNumber(userData.xp, 0),
       })
 
       router.push('/dashboard')

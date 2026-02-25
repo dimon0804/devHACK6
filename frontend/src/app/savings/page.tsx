@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Badge } from '@/components/ui/Badge'
+import { formatBalance, toNumber } from '@/lib/utils'
 
 export default function SavingsPage() {
   const router = useRouter()
@@ -32,8 +33,8 @@ export default function SavingsPage() {
       const goals = Array.isArray(response.data) 
         ? response.data.map((goal: any) => ({
             ...goal,
-            current_amount: Number(goal.current_amount || 0),
-            target_amount: Number(goal.target_amount || 0),
+            current_amount: toNumber(goal.current_amount, 0),
+            target_amount: toNumber(goal.target_amount, 0),
           }))
         : []
       setGoals(goals)
@@ -120,9 +121,9 @@ export default function SavingsPage() {
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span>
-                      {Number(goal.current_amount || 0).toFixed(2)} / {Number(goal.target_amount || 0).toFixed(2)}
+                      {formatBalance(goal.current_amount)} / {formatBalance(goal.target_amount)}
                     </span>
-                    <span>{Number(progress || 0).toFixed(0)}%</span>
+                    <span>{toNumber(progress, 0).toFixed(0)}%</span>
                   </div>
                   <ProgressBar value={goal.current_amount} max={goal.target_amount} />
                 </div>

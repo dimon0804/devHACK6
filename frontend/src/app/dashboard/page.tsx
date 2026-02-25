@@ -10,18 +10,26 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Badge } from '@/components/ui/Badge'
 import { useTheme } from 'next-themes'
 import { Moon, Sun, Globe } from 'lucide-react'
+import { formatBalance, toNumber } from '@/lib/utils'
 
 export default function DashboardPage() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuthStore()
   const { theme, setTheme } = useTheme()
-  const [userData, setUserData] = useState(
+  const [userData, setUserData] = useState<{
+    id: number
+    email: string
+    username: string
+    level: number
+    xp: number
+    balance: number
+  } | null>(
     user
       ? {
           ...user,
-          balance: Number(user.balance || 0),
-          level: Number(user.level || 1),
-          xp: Number(user.xp || 0),
+          balance: toNumber(user.balance, 0),
+          level: toNumber(user.level, 1),
+          xp: toNumber(user.xp, 0),
         }
       : null
   )
@@ -40,9 +48,9 @@ export default function DashboardPage() {
         // Ensure numeric types
         setUserData({
           ...data,
-          balance: Number(data.balance || 0),
-          level: Number(data.level || 1),
-          xp: Number(data.xp || 0),
+          balance: toNumber(data.balance, 0),
+          level: toNumber(data.level, 1),
+          xp: toNumber(data.xp, 0),
         })
       } catch {
         logout()
@@ -65,7 +73,8 @@ export default function DashboardPage() {
 
   if (!userData) return null
 
-  const xpInLevel = userData.xp % 100
+  const xp = toNumber(userData.xp, 0)
+  const xpInLevel = xp % 100
   const xpToNextLevel = 100 - xpInLevel
 
   return (
@@ -96,20 +105,20 @@ export default function DashboardPage() {
               Balance
             </h3>
             <p className="text-3xl font-bold text-primary">
-              ${typeof userData.balance === 'number' ? userData.balance.toFixed(2) : Number(userData.balance || 0).toFixed(2)}
+              ${formatBalance(userData.balance)}
             </p>
           </Card>
           <Card>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Level
             </h3>
-            <p className="text-3xl font-bold text-primary">{userData.level}</p>
+            <p className="text-3xl font-bold text-primary">{toNumber(userData.level, 1)}</p>
           </Card>
           <Card>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               XP
             </h3>
-            <p className="text-3xl font-bold text-primary">{userData.xp}</p>
+            <p className="text-3xl font-bold text-primary">{xp}</p>
             <ProgressBar value={xpInLevel} max={100} className="mt-2" />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {xpToNextLevel} XP to next level
