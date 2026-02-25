@@ -80,7 +80,22 @@
     "welcomeBack": "Welcome back",
     "yourBalance": "Your Balance",
     "financialRating": "Financial Rating",
-    "recentActivity": "Recent Activity"
+    "recentActivity": "Recent Activity",
+    "viewHistory": "Transaction History"
+  },
+  "history": {
+    "title": "Transaction History",
+    "subtitle": "View all your financial transactions",
+    "all": "All",
+    "income": "Income",
+    "expense": "Expense",
+    "totalIncome": "Total Income",
+    "totalExpense": "Total Expense",
+    "balance": "Balance",
+    "incomeExpenseChart": "Income and Expenses (Last 7 Days)",
+    "categoryChart": "Distribution by Category",
+    "recentTransactions": "Recent Transactions",
+    "noTransactions": "No transactions yet"
   },
   "about": {
     "heroTitle": "Financial Literacy for Children",

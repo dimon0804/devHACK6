@@ -16,6 +16,11 @@
     "startPlanning": "Начать планирование",
     "manageGoals": "Управление целями",
     "back": "Назад",
+    "previous": "Предыдущая",
+    "next": "Следующая",
+    "page": "Страница",
+    "of": "из",
+    "back": "Назад",
     "backToDashboard": "← Вернуться на панель",
     "processing": "Обработка...",
     "success": "Успешно",
@@ -80,7 +85,22 @@
     "welcomeBack": "С возвращением",
     "yourBalance": "Ваш баланс",
     "financialRating": "Финансовый рейтинг",
-    "recentActivity": "Последняя активность"
+    "recentActivity": "Последняя активность",
+    "viewHistory": "История транзакций"
+  },
+  "history": {
+    "title": "История транзакций",
+    "subtitle": "Просмотр всех ваших финансовых операций",
+    "all": "Все",
+    "income": "Доходы",
+    "expense": "Расходы",
+    "totalIncome": "Общий доход",
+    "totalExpense": "Общие расходы",
+    "balance": "Баланс",
+    "incomeExpenseChart": "Доходы и расходы за неделю",
+    "categoryChart": "Распределение по категориям",
+    "recentTransactions": "Последние транзакции",
+    "noTransactions": "Транзакций пока нет"
   },
   "about": {
     "heroTitle": "Финансовая грамотность для детей",

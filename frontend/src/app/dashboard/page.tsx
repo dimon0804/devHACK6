@@ -14,7 +14,7 @@ import { AnimatedCounter } from '@/components/ui/AnimatedCounter'
 import { Badge } from '@/components/ui/Badge'
 import { Footer } from '@/components/layout/Footer'
 import { useTheme } from 'next-themes'
-import { Moon, Sun, Globe, TrendingUp, Target } from 'lucide-react'
+import { Moon, Sun, Globe, TrendingUp, Target, History } from 'lucide-react'
 import { formatBalanceNumber, toNumber } from '@/lib/utils'
 
 const containerVariants = {
@@ -219,7 +219,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Quick Actions */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card hover onClick={() => router.push('/budget')} className="group cursor-pointer">
               <div className="flex items-center justify-between">
                 <div>
@@ -253,6 +253,25 @@ export default function DashboardPage() {
                   </p>
                   <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
                     {t('common.manageGoals')}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            <Card hover onClick={() => router.push('/history')} className="group cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-primary/10 rounded-xl">
+                      <History className="text-primary" size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold">{t('dashboard.viewHistory')}</h3>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    {t('history.subtitle')}
+                  </p>
+                  <Button variant="primary" size="sm" className="group-hover:scale-105 transition-transform">
+                    {t('history.title')}
                   </Button>
                 </div>
               </div>
