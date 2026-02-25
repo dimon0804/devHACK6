@@ -62,7 +62,9 @@ class AuthService:
                 detail="Incorrect email or password"
             )
 
-        if not verify_password(login_data.password, user.hashed_password):
+        # Verify password
+        is_valid = verify_password(login_data.password, user.hashed_password)
+        if not is_valid:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password"

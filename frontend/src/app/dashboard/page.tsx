@@ -15,7 +15,16 @@ export default function DashboardPage() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuthStore()
   const { theme, setTheme } = useTheme()
-  const [userData, setUserData] = useState(user)
+  const [userData, setUserData] = useState(
+    user
+      ? {
+          ...user,
+          balance: Number(user.balance || 0),
+          level: Number(user.level || 1),
+          xp: Number(user.xp || 0),
+        }
+      : null
+  )
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
