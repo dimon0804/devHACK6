@@ -203,7 +203,7 @@ export default function DashboardPage() {
                     duration={1.5}
                     className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-400 bg-clip-text text-transparent"
                   />
-                  <span className="text-3xl md:text-4xl font-bold text-gray-700 dark:text-gray-300">₽</span>
+                  <span className="text-3xl md:text-4xl font-bold text-gray-700 dark:text-gray-300">{t('common.rubles')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <TrendingUp size={16} className="text-primary" />
@@ -261,7 +261,7 @@ export default function DashboardPage() {
             <Card>
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('common.balance')}</div>
               <div className="text-3xl font-bold">
-                <AnimatedCounter value={userData.balance} prefix="₽" />
+                <AnimatedCounter value={userData.balance} prefix={t('common.rubles')} />
               </div>
             </Card>
             <Card>
