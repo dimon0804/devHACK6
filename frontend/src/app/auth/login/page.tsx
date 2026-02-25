@@ -34,7 +34,9 @@ export default function LoginPage() {
 
       router.push('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed')
+      console.error('Login error:', err)
+      const errorMessage = err.response?.data?.detail || err.message || 'Login failed'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
