@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
+from fastapi.responses import JSONResponse
 from app.core.database import engine
 from sqlalchemy import text
 
@@ -12,4 +13,7 @@ async def health_check():
             conn.execute(text("SELECT 1"))
         return {"status": "healthy", "service": "game-service"}
     except Exception as e:
-        return {"status": "unhealthy", "error": str(e)}, 503
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"status": "unhealthy", "error": str(e)}
+        )

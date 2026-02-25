@@ -66,10 +66,12 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+      start_period: 10s
 
   user-service:
     build:
@@ -92,10 +94,12 @@ services:
       auth-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+      start_period: 10s
 
   game-service:
     build:
@@ -119,10 +123,12 @@ services:
       user-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+      start_period: 10s
 
   progress-service:
     build:
@@ -145,10 +151,12 @@ services:
       user-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+      start_period: 10s
 
   api-gateway:
     build:
@@ -175,10 +183,12 @@ services:
       progress-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+      start_period: 10s
 
   frontend:
     build:
@@ -194,10 +204,11 @@ services:
     depends_on:
       - api-gateway
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
 
 networks:
   fintech_network:
