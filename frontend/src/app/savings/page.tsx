@@ -12,14 +12,19 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { CircularProgress } from '@/components/ui/CircularProgress'
 import { Badge } from '@/components/ui/Badge'
 import { Footer } from '@/components/layout/Footer'
-import { Plus, Target, TrendingUp } from 'lucide-react'
+import { Plus, Target, TrendingUp, Wallet } from 'lucide-react'
 import { formatBalanceNumber, toNumber } from '@/lib/utils'
+import { useAuthStore } from '@/store/authStore'
+import { useToastStore } from '@/store/toastStore'
 
 export default function SavingsPage() {
   const router = useRouter()
   const { t } = useTranslation()
+  const { user } = useAuthStore()
+  const { addToast } = useToastStore()
   const [goals, setGoals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [userBalance, setUserBalance] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newGoal, setNewGoal] = useState({ title: '', target_amount: '' })
   const [depositModal, setDepositModal] = useState<{ isOpen: boolean; goalId: number | null }>({
@@ -28,9 +33,14 @@ export default function SavingsPage() {
   })
   const [depositAmount, setDepositAmount] = useState('')
   const [depositError, setDepositError] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('')
+  const [availableCategories, setAvailableCategories] = useState<any[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(false)
 
   useEffect(() => {
     fetchGoals()
+    fetchUserBalance()
+    fetchCategories()
   }, [])
 
   const fetchGoals = async () => {
@@ -48,6 +58,29 @@ export default function SavingsPage() {
       console.error('Failed to fetch goals', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchUserBalance = async () => {
+    try {
+      const response = await api.get('/api/v1/users/me')
+      setUserBalance(toNumber(response.data.balance, 0))
+    } catch (err) {
+      console.error('Failed to fetch balance', err)
+    }
+  }
+
+  const fetchCategories = async () => {
+    setLoadingCategories(true)
+    try {
+      const response = await api.get('/api/v1/categories', {
+        params: { category_type: 'expense' }
+      })
+      setAvailableCategories(response.data)
+    } catch (err) {
+      console.error('Failed to fetch categories', err)
+    } finally {
+      setLoadingCategories(false)
     }
   }
 
@@ -74,28 +107,56 @@ export default function SavingsPage() {
     const amount = parseFloat(depositAmount)
     
     if (isNaN(amount) || amount <= 0) {
-      setDepositError(t('savings.invalidAmount'))
+      setDepositError('Введите корректную сумму (больше 0)')
+      return
+    }
+
+    if (amount > userBalance) {
+      setDepositError('Недостаточно средств на балансе')
       return
     }
 
     try {
+      // Если выбрана категория, сначала тратим из категории
+      if (selectedCategory) {
+        try {
+          await api.post('/api/v1/budget/spend', {
+            amount: amount,
+            category: selectedCategory,
+          })
+        } catch (spendErr: any) {
+          console.error('Failed to spend from category', spendErr)
+          // Продолжаем пополнение цели даже если не удалось списать из категории
+        }
+      }
+
       await api.post('/api/v1/savings/deposit', {
         goal_id: depositModal.goalId,
         amount: amount,
       })
+      
+      const goal = goals.find(g => g.id === depositModal.goalId)
+      addToast({
+        message: `💰 Пополнено ${formatBalanceNumber(amount)} ₽ на цель "${goal?.title || ''}"${selectedCategory ? ` из категории "${selectedCategory}"` : ''}`,
+        type: 'success',
+        duration: 4000,
+      })
+      
       setDepositModal({ isOpen: false, goalId: null })
       setDepositAmount('')
+      setSelectedCategory('')
       setDepositError('')
       fetchGoals()
+      fetchUserBalance()
     } catch (err: any) {
       console.error('Failed to deposit', err)
       const errorMessage = err.response?.data?.detail || err.message || t('savings.depositFailed')
       
       // Переводим стандартные сообщения об ошибках
       if (errorMessage.includes('Insufficient balance') || errorMessage.includes('insufficient')) {
-        setDepositError(t('savings.insufficientBalance'))
+        setDepositError('Недостаточно средств на балансе')
       } else if (errorMessage.includes('completed')) {
-        setDepositError(t('savings.goalCompleted'))
+        setDepositError('Цель уже завершена')
       } else {
         setDepositError(errorMessage)
       }
@@ -149,6 +210,38 @@ export default function SavingsPage() {
               </p>
             </div>
           </div>
+
+          {/* Balance Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <Card glow className="bg-gradient-to-r from-primary/10 to-primary/5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-xl bg-primary/20">
+                    <Wallet className="text-primary" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      Ваш баланс
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {formatBalanceNumber(userBalance)} ₽
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/budget')}
+                >
+                  Планировать бюджет
+                </Button>
+              </div>
+            </Card>
+          </motion.div>
 
           {goals.length === 0 ? (
             <Card className="text-center py-12">
@@ -316,37 +409,85 @@ export default function SavingsPage() {
         onClose={() => {
           setDepositModal({ isOpen: false, goalId: null })
           setDepositAmount('')
+          setSelectedCategory('')
           setDepositError('')
         }}
-        title={t('savings.depositToGoal')}
+        title="Пополнить цель"
       >
         <form onSubmit={handleDeposit} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold mb-2">
-              {t('savings.depositAmount')}
+            <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              Сумма пополнения (₽)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={depositAmount}
-              onChange={(e) => {
-                setDepositAmount(e.target.value)
-                setDepositError('')
-              }}
-              required
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-              placeholder="0.00"
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-semibold text-lg">
+                ₽
+              </span>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={userBalance}
+                value={depositAmount}
+                onChange={(e) => {
+                  setDepositAmount(e.target.value)
+                  setDepositError('')
+                }}
+                required
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                placeholder="0.00"
+              />
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Доступно: {formatBalanceNumber(userBalance)} ₽
+            </p>
           </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              Опционально: Выбрать категорию из бюджета
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            >
+              <option value="">Не использовать категорию</option>
+              {availableCategories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Если выбрана категория, деньги будут списаны из неё
+            </p>
+          </div>
+
           {depositError && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
               <p className="text-sm text-red-600 dark:text-red-400">{depositError}</p>
             </div>
           )}
-          <Button type="submit" className="w-full" variant="primary">
-            {t('savings.deposit')}
-          </Button>
+
+          <div className="flex gap-3 pt-2">
+            <Button type="submit" className="flex-1" variant="primary" disabled={!depositAmount || parseFloat(depositAmount) <= 0}>
+              Пополнить
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setDepositModal({ isOpen: false, goalId: null })
+                setDepositAmount('')
+                setSelectedCategory('')
+                setDepositError('')
+              }}
+              className="flex-1"
+            >
+              Отмена
+            </Button>
+          </div>
         </form>
       </Modal>
       <div className="mt-16">
