@@ -72,9 +72,9 @@ export default function HistoryPage() {
 
   const filteredTransactions = transactions.filter((t) => {
     if (filter === 'all') return true
-    const amount = toNumber(t.amount, 0)
-    if (filter === 'income') return amount > 0
-    if (filter === 'expense') return amount < 0
+    // Используем поле type для определения типа транзакции
+    if (filter === 'income') return t.type === 'income'
+    if (filter === 'expense') return t.type === 'expense'
     return true
   })
 
@@ -94,20 +94,20 @@ export default function HistoryPage() {
       return tDate === date
     })
     const income = dayTransactions
-      .filter((t) => toNumber(t.amount, 0) > 0)
+      .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
     const expense = dayTransactions
-      .filter((t) => toNumber(t.amount, 0) < 0)
+      .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
     return { date, income, expense }
   })
 
   // Группируем категории с учетом знака суммы (доходы/расходы)
   const categoryData = filteredTransactions.reduce((acc: any, t) => {
-    const amount = toNumber(t.amount, 0)
-    const isIncome = amount > 0
+    // Используем поле type для определения типа транзакции
+    const isIncome = t.type === 'income'
     const type = t.type || 'other'
-    const amountAbs = Math.abs(amount)
+    const amountAbs = Math.abs(toNumber(t.amount, 0))
     
     // Создаем уникальный ключ для категории с учетом типа (доход/расход)
     const categoryKey = `${type}_${isIncome ? 'income' : 'expense'}`
@@ -143,14 +143,12 @@ export default function HistoryPage() {
     .slice(0, 10) // Увеличиваем количество категорий для лучшего отображения
 
   const totalIncome = filteredTransactions
-    .filter((t) => toNumber(t.amount, 0) > 0)
-    .reduce((sum, t) => sum + toNumber(t.amount, 0), 0)
+    .filter((t) => t.type === 'income')
+    .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
 
-  const totalExpense = Math.abs(
-    filteredTransactions
-      .filter((t) => toNumber(t.amount, 0) < 0)
-      .reduce((sum, t) => sum + toNumber(t.amount, 0), 0)
-  )
+  const totalExpense = filteredTransactions
+    .filter((t) => t.type === 'expense')
+    .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -402,9 +400,10 @@ export default function HistoryPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredTransactions.map((transaction) => {
-                    const amount = toNumber(transaction.amount, 0)
-                    const isIncome = amount > 0
+                    {filteredTransactions.map((transaction) => {
+                      const amount = Math.abs(toNumber(transaction.amount, 0))
+                      // Используем поле type для определения типа транзакции
+                      const isIncome = transaction.type === 'income'
                     return (
                       <motion.div
                         key={transaction.id}
