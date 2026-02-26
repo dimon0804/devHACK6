@@ -143,6 +143,20 @@ class SavingsService:
                         )
                     except Exception:
                         pass
+                    
+                    # Award badge for goal completion
+                    try:
+                        await client.post(
+                            f"{settings.EDUCATION_SERVICE_URL}/api/v1/badges/check",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "badge_type": "goal_completed",
+                                "condition": {"type": "goal_completed", "goal_id": goal.id}
+                            },
+                            timeout=5.0
+                        )
+                    except Exception:
+                        pass
             except httpx.RequestError:
                 pass
 
