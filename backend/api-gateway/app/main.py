@@ -34,6 +34,7 @@ async def root():
             "users": "/api/v1/users",
             "budget": "/api/v1/budget",
             "savings": "/api/v1/savings",
+            "categories": "/api/v1/categories",
             "transactions": "/api/v1/transactions",
             "quests": "/api/v1/quests"
         }

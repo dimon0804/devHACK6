@@ -10,17 +10,13 @@ SERVICE_ROUTES = {
     "users": settings.USER_SERVICE_URL,
     "budget": settings.GAME_SERVICE_URL,
     "savings": settings.GAME_SERVICE_URL,
+    "categories": settings.GAME_SERVICE_URL,
     "transactions": settings.PROGRESS_SERVICE_URL,
     "quests": settings.PROGRESS_SERVICE_URL,
 }
 
 
-@router.api_route(
-    "/{service}/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    include_in_schema=True
-)
-async def proxy_request(service: str, path: str, request: Request):
+async def _proxy_request(service: str, path: str, request: Request):
     if service not in SERVICE_ROUTES:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -35,6 +31,7 @@ async def proxy_request(service: str, path: str, request: Request):
         else:
             url = f"{base_url}/api/v1/{service}"
     else:
+        # For categories, budget, savings - they're already under /api/v1 in game-service
         if path:
             url = f"{base_url}/api/v1/{service}/{path}"
         else:
@@ -47,7 +44,7 @@ async def proxy_request(service: str, path: str, request: Request):
     body = await request.body()
 
     try:
-        async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT) as client:
+        async with httpx.AsyncClient(timeout=settings.REQUEST_TIMEOUT, follow_redirects=False) as client:
             response = await client.request(
                 method=request.method,
                 url=url,
@@ -71,3 +68,21 @@ async def proxy_request(service: str, path: str, request: Request):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"Service unavailable: {str(e)}"
         )
+
+
+@router.api_route(
+    "/{service}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    include_in_schema=True
+)
+async def proxy_request_no_path(service: str, request: Request):
+    return await _proxy_request(service, "", request)
+
+
+@router.api_route(
+    "/{service}/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    include_in_schema=True
+)
+async def proxy_request(service: str, path: str, request: Request):
+    return await _proxy_request(service, path, request)

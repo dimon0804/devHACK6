@@ -4,6 +4,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { I18nProvider } from '@/components/providers/I18nProvider'
 import { CookieConsent } from '@/components/layout/CookieConsent'
+import { ToastContainer } from '@/components/ui/ToastContainer'
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] })
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <I18nProvider>
             {children}
             <CookieConsent />
+            <ToastContainer />
           </I18nProvider>
         </ThemeProvider>
       </body>

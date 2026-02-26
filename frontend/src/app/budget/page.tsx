@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
@@ -9,26 +9,110 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Footer } from '@/components/layout/Footer'
+import { useToastStore } from '@/store/toastStore'
 import { Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
+
+interface Category {
+  id: number
+  name: string
+  type: 'income' | 'expense' | 'savings'
+  user_id: number | null
+}
 
 export default function BudgetPage() {
   const router = useRouter()
   const { t } = useTranslation()
+  const { addToast } = useToastStore()
   const [income, setIncome] = useState('')
   const [categories, setCategories] = useState([
-    { name: '', amount: '' },
+    { name: '', amount: '', categoryId: null as number | null },
   ])
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingCategories, setLoadingCategories] = useState(true)
   const [result, setResult] = useState<any>(null)
+  const [showNewCategoryModal, setShowNewCategoryModal] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
 
-  const addCategory = () => {
-    setCategories([...categories, { name: '', amount: '' }])
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/api/v1/categories', {
+        params: { category_type: 'expense' }
+      })
+      setAvailableCategories(response.data)
+    } catch (err) {
+      console.error('Failed to fetch categories', err)
+    } finally {
+      setLoadingCategories(false)
+    }
   }
 
-  const updateCategory = (index: number, field: string, value: string) => {
+  const addCategory = () => {
+    setCategories([...categories, { name: '', amount: '', categoryId: null }])
+  }
+
+  const updateCategory = (index: number, field: string, value: string | number | null) => {
     const updated = [...categories]
     updated[index] = { ...updated[index], [field]: value }
     setCategories(updated)
+  }
+
+  const handleCategorySelect = (index: number, categoryId: number) => {
+    const category = availableCategories.find(c => c.id === categoryId)
+    if (category) {
+      updateCategory(index, 'name', category.name)
+      updateCategory(index, 'categoryId', categoryId)
+    }
+  }
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) return
+    
+    try {
+      const response = await api.post('/api/v1/categories', {
+        name: newCategoryName.trim(),
+        type: 'expense'
+      })
+      setAvailableCategories([...availableCategories, response.data])
+      // Автоматически выбираем новую категорию в первом пустом поле
+      const emptyIndex = categories.findIndex(c => !c.name)
+      if (emptyIndex !== -1) {
+        handleCategorySelect(emptyIndex, response.data.id)
+      }
+      setNewCategoryName('')
+      setShowNewCategoryModal(false)
+      addToast({
+        message: `Категория "${newCategoryName.trim()}" успешно создана!`,
+        type: 'success',
+        duration: 3000,
+      })
+    } catch (err: any) {
+      console.error('Failed to create category', err)
+      const status = err.response?.status
+      const detail = err.response?.data?.detail || ''
+      
+      if (status === 409 || status === 400 || detail.includes('already exists') || detail.includes('уже существует')) {
+        // Используем сообщение с бэкенда, если оно есть, иначе формируем своё
+        const message = detail.includes('уже существует') || detail.includes('already exists')
+          ? detail
+          : `Категория "${newCategoryName.trim()}" уже существует. Выберите её из списка или введите другое название.`
+        addToast({
+          message,
+          type: 'warning',
+          duration: 5000,
+        })
+      } else {
+        addToast({
+          message: detail || 'Не удалось создать категорию. Попробуйте ещё раз.',
+          type: 'error',
+          duration: 4000,
+        })
+      }
+    }
   }
 
   const removeCategory = (index: number) => {
@@ -128,15 +212,33 @@ export default function BudgetPage() {
                       animate={{ opacity: 1, x: 0 }}
                       className="flex gap-3"
                     >
-                      <input
-                        type="text"
-                        placeholder={t('budget.categoryName')}
-                        value={category.name}
-                        onChange={(e) =>
-                          updateCategory(index, 'name', e.target.value)
-                        }
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all min-w-0"
-                      />
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          list={`category-list-${index}`}
+                          placeholder={t('budget.categoryName')}
+                          value={category.name}
+                          onChange={(e) => {
+                            updateCategory(index, 'name', e.target.value)
+                            updateCategory(index, 'categoryId', null)
+                          }}
+                          onFocus={(e) => {
+                            // Показываем список при фокусе
+                            e.target.click()
+                          }}
+                          className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all min-w-0"
+                        />
+                        <datalist id={`category-list-${index}`}>
+                          {availableCategories.map((cat) => (
+                            <option key={cat.id} value={cat.name} />
+                          ))}
+                        </datalist>
+                        {category.name && !availableCategories.find(c => c.name === category.name) && (
+                          <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-gray-600 dark:text-gray-400">
+                            Нажмите Enter или выберите из списка
+                          </div>
+                        )}
+                      </div>
                       <input
                         type="number"
                         step="0.01"
@@ -160,6 +262,16 @@ export default function BudgetPage() {
                       )}
                     </motion.div>
                   ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowNewCategoryModal(true)}
+                    className="w-full mt-2"
+                  >
+                    <Plus size={16} className="mr-1" />
+                    Создать новую категорию
+                  </Button>
                 </div>
 
                 {income && (
@@ -227,6 +339,51 @@ export default function BudgetPage() {
           </Card>
         </motion.div>
       </div>
+      
+      {/* Modal для создания новой категории */}
+      {showNewCategoryModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full"
+          >
+            <h3 className="text-xl font-bold mb-4">Создать новую категорию</h3>
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="Название категории"
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 mb-4"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleCreateCategory()
+                }
+              }}
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="primary"
+                onClick={handleCreateCategory}
+                className="flex-1"
+              >
+                Создать
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowNewCategoryModal(false)
+                  setNewCategoryName('')
+                }}
+                className="flex-1"
+              >
+                Отмена
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      
       <Footer />
     </main>
   )
