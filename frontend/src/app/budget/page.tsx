@@ -219,25 +219,41 @@ export default function BudgetPage() {
                           placeholder={t('budget.categoryName')}
                           value={category.name}
                           onChange={(e) => {
-                            updateCategory(index, 'name', e.target.value)
-                            updateCategory(index, 'categoryId', null)
+                            const value = e.target.value
+                            const updated = [...categories]
+                            updated[index] = { 
+                              ...updated[index], 
+                              name: value,
+                              categoryId: null // Сбрасываем при изменении
+                            }
+                            setCategories(updated)
                           }}
-                          onFocus={(e) => {
-                            // Показываем список при фокусе
-                            e.target.click()
+                          onBlur={(e) => {
+                            // При потере фокуса проверяем точное совпадение
+                            const value = e.target.value.trim()
+                            if (value) {
+                              const matchedCategory = availableCategories.find(
+                                c => c.name === value
+                              )
+                              if (matchedCategory) {
+                                const updated = [...categories]
+                                updated[index] = { 
+                                  ...updated[index], 
+                                  name: matchedCategory.name,
+                                  categoryId: matchedCategory.id
+                                }
+                                setCategories(updated)
+                              }
+                            }
                           }}
                           className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all min-w-0"
+                          autoComplete="off"
                         />
                         <datalist id={`category-list-${index}`}>
                           {availableCategories.map((cat) => (
                             <option key={cat.id} value={cat.name} />
                           ))}
                         </datalist>
-                        {category.name && !availableCategories.find(c => c.name === category.name) && (
-                          <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-gray-600 dark:text-gray-400">
-                            Нажмите Enter или выберите из списка
-                          </div>
-                        )}
                       </div>
                       <input
                         type="number"
