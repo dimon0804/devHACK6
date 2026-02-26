@@ -378,8 +378,8 @@ export default function DashboardPage() {
                     <span className="text-primary">1️⃣</span> Прохождение квизов
                   </h4>
                   <ul className="list-disc list-inside space-y-1 ml-6 text-sm">
-                    <li>Перейдите в раздел <strong>"Обучающие квизы"</strong> на главной странице</li>
-                    <li>Выберите интересующий вас квиз (например, "Что такое бюджет?")</li>
+                    <li>Перейдите в раздел <strong>&quot;Обучающие квизы&quot;</strong> на главной странице</li>
+                    <li>Выберите интересующий вас квиз (например, &quot;Что такое бюджет?&quot;)</li>
                     <li>Прочитайте вопрос и выберите правильный ответ</li>
                     <li>После прохождения всех вопросов вы получите XP и бейдж (если это ваш первый квиз)</li>
                     <li>Результаты сохраняются автоматически</li>
@@ -394,7 +394,7 @@ export default function DashboardPage() {
                     <li><strong>За квизы:</strong> Пройдите квиз полностью, чтобы получить соответствующий бейдж</li>
                     <li><strong>За обучение:</strong> Завершите пошаговое обучение (Guided Mode)</li>
                     <li><strong>За достижения:</strong> Создайте первый бюджет, достигните цели накопления</li>
-                    <li>Все ваши бейджи можно посмотреть в разделе <strong>"Мои бейджи"</strong></li>
+                    <li>Все ваши бейджи можно посмотреть в разделе <strong>&quot;Мои бейджи&quot;</strong></li>
                   </ul>
                 </div>
                 <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
