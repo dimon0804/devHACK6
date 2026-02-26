@@ -25,39 +25,49 @@ class BadgeService:
         user_id: int,
         badge_type: str,
         condition_data: dict,
-        token: str
+        token: str = None
     ) -> Optional[Badge]:
         """Check if user should receive a badge and award it"""
-        # Find badge by condition
-        badge = db.query(Badge).filter(
-            Badge.condition['type'].astext == badge_type
-        ).first()
+        from sqlalchemy import text
+        import json
+        
+        # Find badges by condition type using raw SQL
+        result = db.execute(
+            text("SELECT id, name, title, description, icon, condition FROM badges WHERE condition->>'type' = :badge_type"),
+            {"badge_type": badge_type}
+        )
+        
+        badges = result.fetchall()
+        
+        for badge_row in badges:
+            badge_id, name, title, description, icon, condition_json = badge_row
+            condition = json.loads(condition_json) if isinstance(condition_json, str) else condition_json
+            
+            # Check if already earned
+            existing = db.query(UserBadge).filter(
+                UserBadge.user_id == user_id,
+                UserBadge.badge_id == badge_id
+            ).first()
 
-        if not badge:
-            return None
+            if existing:
+                continue
 
-        # Check if already earned
-        existing = db.query(UserBadge).filter(
-            UserBadge.user_id == user_id,
-            UserBadge.badge_id == badge.id
-        ).first()
-
-        if existing:
-            return badge
-
-        # Check condition
-        condition = badge.condition
-        if condition.get('type') == 'quiz_completed':
-            if condition_data.get('quiz_id') == condition.get('quiz_id'):
-                # Award badge
-                from datetime import datetime
-                user_badge = UserBadge(
-                    user_id=user_id,
-                    badge_id=badge.id,
-                    earned_at=datetime.utcnow()
-                )
-                db.add(user_badge)
-                db.commit()
-                return badge
+            # Check condition
+            if condition.get('type') == 'quiz_completed':
+                if condition_data.get('quiz_id') == condition.get('quiz_id'):
+                    # Award badge
+                    from datetime import datetime
+                    user_badge = UserBadge(
+                        user_id=user_id,
+                        badge_id=badge_id,
+                        earned_at=datetime.utcnow()
+                    )
+                    db.add(user_badge)
+                    db.commit()
+                    db.refresh(user_badge)
+                    
+                    # Return badge object
+                    badge = db.query(Badge).filter(Badge.id == badge_id).first()
+                    return badge
 
         return None

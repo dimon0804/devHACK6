@@ -36,7 +36,10 @@ async def root():
             "savings": "/api/v1/savings",
             "categories": "/api/v1/categories",
             "transactions": "/api/v1/transactions",
-            "quests": "/api/v1/quests"
+            "quests": "/api/v1/quests",
+            "quizzes": "/api/v1/quizzes",
+            "badges": "/api/v1/badges",
+            "guided": "/api/v1/guided"
         }
     }
 

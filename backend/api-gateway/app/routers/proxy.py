@@ -13,6 +13,9 @@ SERVICE_ROUTES = {
     "categories": settings.GAME_SERVICE_URL,
     "transactions": settings.PROGRESS_SERVICE_URL,
     "quests": settings.PROGRESS_SERVICE_URL,
+    "quizzes": settings.EDUCATION_SERVICE_URL,
+    "badges": settings.EDUCATION_SERVICE_URL,
+    "guided": settings.EDUCATION_SERVICE_URL,
 }
 
 

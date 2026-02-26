@@ -1,16 +1,17 @@
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from app.core.database import get_db
 
 router = APIRouter()
 
 
 @router.get("")
-async def health_check(db: Session = get_db().__next__()):
+async def health_check(db: Session = next(get_db())):
     """Health check endpoint"""
     try:
         # Test database connection
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         return {
             "status": "healthy",
             "service": "education-service",

@@ -154,6 +154,34 @@ services:
       retries: 3
       start_period: 10s
 
+  education-service:
+    build:
+      context: ./backend/education-service
+      dockerfile: Dockerfile
+    container_name: fintech_education_service
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fintech_user}:${POSTGRES_PASSWORD:-fintech_pass}@postgres:5432/${POSTGRES_DB:-fintech_db}
+      - REDIS_URL=redis://redis:6379
+      - USER_SERVICE_URL=http://user-service:8000
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+    ports:
+      - "${EDUCATION_SERVICE_PORT:-8005}:8000"
+    networks:
+      - fintech_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   api-gateway:
     build:
       context: ./backend/api-gateway
@@ -164,6 +192,7 @@ services:
       - USER_SERVICE_URL=http://user-service:8000
       - GAME_SERVICE_URL=http://game-service:8000
       - PROGRESS_SERVICE_URL=http://progress-service:8000
+      - EDUCATION_SERVICE_URL=http://education-service:8000
       - REDIS_URL=redis://redis:6379
     ports:
       - "${API_GATEWAY_PORT:-8000}:8000"
@@ -177,6 +206,8 @@ services:
       game-service:
         condition: service_healthy
       progress-service:
+        condition: service_healthy
+      education-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
