@@ -88,6 +88,13 @@ export default function GuidedModePage() {
               <div className="text-center py-12 text-gray-500">
                 {t('common.loading')}
               </div>
+            ) : steps.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-gray-500 mb-4">{t('guided.noSteps')}</p>
+                <Button variant="primary" onClick={() => router.push('/dashboard')}>
+                  {t('common.backToDashboard')}
+                </Button>
+              </Card>
             ) : (
               <div className="space-y-4">
                 {steps.map((step, index) => (

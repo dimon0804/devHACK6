@@ -366,6 +366,46 @@ export default function DashboardPage() {
             </Card>
           </motion.div>
 
+          {/* Instructions Section */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <Card className="bg-gradient-to-br from-primary/5 via-transparent to-secondary/5">
+              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-primary to-primary-400 bg-clip-text text-transparent">
+                📚 Как получить бейджи и пройти квизы
+              </h3>
+              <div className="space-y-4 text-gray-700 dark:text-gray-300">
+                <div>
+                  <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                    <span className="text-primary">1️⃣</span> Прохождение квизов
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1 ml-6 text-sm">
+                    <li>Перейдите в раздел <strong>"Обучающие квизы"</strong> на главной странице</li>
+                    <li>Выберите интересующий вас квиз (например, "Что такое бюджет?")</li>
+                    <li>Прочитайте вопрос и выберите правильный ответ</li>
+                    <li>После прохождения всех вопросов вы получите XP и бейдж (если это ваш первый квиз)</li>
+                    <li>Результаты сохраняются автоматически</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                    <span className="text-primary">2️⃣</span> Получение бейджей
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1 ml-6 text-sm">
+                    <li>Бейджи автоматически выдаются за выполнение различных действий</li>
+                    <li><strong>За квизы:</strong> Пройдите квиз полностью, чтобы получить соответствующий бейдж</li>
+                    <li><strong>За обучение:</strong> Завершите пошаговое обучение (Guided Mode)</li>
+                    <li><strong>За достижения:</strong> Создайте первый бюджет, достигните цели накопления</li>
+                    <li>Все ваши бейджи можно посмотреть в разделе <strong>"Мои бейджи"</strong></li>
+                  </ul>
+                </div>
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    💡 <strong>Совет:</strong> Начните с простых квизов для получения первых бейджей и опыта!
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
           {/* Stats Grid */}
           <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
