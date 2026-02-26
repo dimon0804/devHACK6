@@ -10,8 +10,7 @@ router = APIRouter()
 
 
 async def get_current_user_id(
-    authorization: Optional[str] = Header(None),
-    db: Session = Depends(get_db)
+    authorization: Optional[str] = Header(None)
 ) -> int:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
