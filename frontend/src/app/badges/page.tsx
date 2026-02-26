@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Footer } from '@/components/layout/Footer'
 import { ArrowLeft, Award, CheckCircle } from 'lucide-react'
+import { Badge } from '@/components/ui/Badge'
 
 interface Badge {
   id: number
@@ -119,13 +120,13 @@ export default function BadgesPage() {
                             )}
                             <div className="mt-4">
                               {isEarned ? (
-                                <BadgeComponent className="bg-primary/10 text-primary">
+                                <Badge className="bg-primary/10 text-primary">
                                   {t('badges.earned')}
-                                </BadgeComponent>
+                                </Badge>
                               ) : (
-                                <BadgeComponent className="bg-gray-200 dark:bg-gray-700 text-gray-500">
+                                <Badge className="bg-gray-200 dark:bg-gray-700 text-gray-500">
                                   {t('badges.notEarned')}
-                                </BadgeComponent>
+                                </Badge>
                               )}
                             </div>
                           </div>

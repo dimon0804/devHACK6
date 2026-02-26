@@ -44,6 +44,7 @@ export default function BudgetPage() {
     fetchCategories()
     // Загружаем историю планирований при загрузке страницы
     fetchTransactionHistory()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchTransactionHistory = async () => {
