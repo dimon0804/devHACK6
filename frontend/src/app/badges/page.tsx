@@ -9,9 +9,9 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Footer } from '@/components/layout/Footer'
 import { ArrowLeft, Award, CheckCircle } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
+import { Badge as BadgeComponent } from '@/components/ui/Badge'
 
-interface Badge {
+interface BadgeData {
   id: number
   name: string
   title: string
@@ -22,7 +22,7 @@ interface Badge {
 export default function BadgesPage() {
   const { t } = useTranslation()
   const router = useRouter()
-  const [badges, setBadges] = useState<Badge[]>([])
+  const [badges, setBadges] = useState<BadgeData[]>([])
   const [userBadges, setUserBadges] = useState<number[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -120,13 +120,13 @@ export default function BadgesPage() {
                             )}
                             <div className="mt-4">
                               {isEarned ? (
-                                <Badge className="bg-primary/10 text-primary">
+                                <BadgeComponent className="bg-primary/10 text-primary">
                                   {t('badges.earned')}
-                                </Badge>
+                                </BadgeComponent>
                               ) : (
-                                <Badge className="bg-gray-200 dark:bg-gray-700 text-gray-500">
+                                <BadgeComponent className="bg-gray-200 dark:bg-gray-700 text-gray-500">
                                   {t('badges.notEarned')}
-                                </Badge>
+                                </BadgeComponent>
                               )}
                             </div>
                           </div>
