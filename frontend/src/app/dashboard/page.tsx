@@ -15,10 +15,19 @@ import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
 import { Footer } from '@/components/layout/Footer'
 import { useTheme } from 'next-themes'
-import { Moon, Sun, Globe, TrendingUp, Target, History, Trophy } from 'lucide-react'
+import { Moon, Sun, Globe, TrendingUp, Target, History, Trophy, BarChart3, Flame, Brain, Shield, Calendar, RefreshCw } from 'lucide-react'
 import { formatBalanceNumber, toNumber } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import { Onboarding } from '@/components/onboarding/Onboarding'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -67,6 +76,19 @@ export default function DashboardPage() {
   const [incomeAmount, setIncomeAmount] = useState('')
   const [incomeLoading, setIncomeLoading] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [goals, setGoals] = useState<any[]>([])
+  const [questProgress, setQuestProgress] = useState<any[]>([])
+  const [financialRating, setFinancialRating] = useState<any>({
+    discipline: 0,
+    stability: 0,
+    riskTendency: 0,
+    financialIQ: 0,
+    profile: 'Новичок',
+    profileDescription: 'Ты только начинаешь свой финансовый путь',
+  })
+  const [stats30Days, setStats30Days] = useState<any>(null)
+  const [loadingStats, setLoadingStats] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -96,10 +118,353 @@ export default function DashboardPage() {
     
     // Check if onboarding should be shown
     const onboardingCompleted = localStorage.getItem('onboarding_completed')
-    if (!onboardingCompleted && userData) {
-      setShowOnboarding(true)
+    if (!onboardingCompleted) {
+      setTimeout(() => {
+        setShowOnboarding(true)
+      }, 1000)
     }
-  }, [isAuthenticated, router, logout, userData])
+  }, [isAuthenticated, router, logout])
+
+  useEffect(() => {
+    if (userData) {
+      fetchFinancialData()
+    }
+  }, [userData])
+
+  const fetchFinancialData = async () => {
+    setLoadingStats(true)
+    try {
+      // Загружаем транзакции за последние 30 дней
+      // API ограничивает page_size до 100, поэтому делаем несколько запросов если нужно
+      let allTransactions: any[] = []
+      let currentPage = 1
+      const pageSize = 100
+      let hasMore = true
+      
+      while (hasMore && currentPage <= 5) { // Максимум 5 страниц (500 транзакций)
+        try {
+          const response = await api.get('/api/v1/transactions', {
+            params: { page: currentPage, page_size: pageSize }
+          })
+          const pageTransactions = response.data.transactions || []
+          allTransactions = [...allTransactions, ...pageTransactions]
+          
+          // Если получили меньше чем pageSize, значит это последняя страница
+          if (pageTransactions.length < pageSize) {
+            hasMore = false
+          } else {
+            currentPage++
+          }
+        } catch (err) {
+          console.error(`Error fetching transactions page ${currentPage}:`, err)
+          hasMore = false
+        }
+      }
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const recentTransactions = allTransactions.filter((tx: any) => 
+        new Date(tx.created_at) >= thirtyDaysAgo
+      )
+      setTransactions(recentTransactions)
+
+      // Загружаем цели
+      let loadedGoals: any[] = []
+      try {
+        const goalsResponse = await api.get('/api/v1/savings/goals')
+        loadedGoals = goalsResponse.data || []
+        setGoals(loadedGoals)
+      } catch (err) {
+        console.error('Failed to fetch goals', err)
+      }
+
+      // Загружаем прогресс квестов
+      let loadedQuestProgress: any[] = []
+      try {
+        const questsResponse = await api.get('/api/v1/quests/progress')
+        loadedQuestProgress = questsResponse.data || []
+        setQuestProgress(loadedQuestProgress)
+      } catch (err) {
+        console.error('Failed to fetch quest progress', err)
+      }
+
+      // Рассчитываем финансовый рейтинг с использованием загруженных данных
+      console.log('=== Financial Rating Calculation ===')
+      console.log('Transactions:', recentTransactions.length, recentTransactions)
+      console.log('Goals:', loadedGoals.length, loadedGoals)
+      console.log('Quest Progress:', loadedQuestProgress.length, loadedQuestProgress)
+      
+      const rating = calculateFinancialRating(recentTransactions, loadedGoals, loadedQuestProgress)
+      console.log('Calculated rating:', rating)
+      console.log('====================================')
+      setFinancialRating(rating || {
+        discipline: 0,
+        stability: 0,
+        riskTendency: 0,
+        financialIQ: 0,
+        profile: 'Новичок',
+        profileDescription: 'Ты только начинаешь свой финансовый путь',
+      })
+
+      // Рассчитываем статистику за 30 дней
+      const stats = calculate30DayStats(recentTransactions, allTransactions, loadedGoals)
+      setStats30Days(stats || {
+        balanceHistory: [],
+        savingsGrowth: 0,
+        currentSavings: 0,
+        income30Days: 0,
+        incomePrevious: 0,
+        expense30Days: 0,
+        expensePrevious: 0,
+        incomeChange: 0,
+        expenseChange: 0,
+        streak: 0,
+      })
+    } catch (err) {
+      console.error('Failed to fetch financial data', err)
+    } finally {
+      setLoadingStats(false)
+    }
+  }
+
+  const calculateFinancialRating = (transactions: any[], goals: any[], questProgress: any[]) => {
+    // 1. Дисциплина (процент накоплений от дохода)
+    const incomeTransactions = transactions.filter(t => t.type === 'income')
+    const totalIncome = incomeTransactions
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    console.log('Discipline calculation:')
+    console.log('  Income transactions:', incomeTransactions.length, incomeTransactions)
+    console.log('  Total income:', totalIncome)
+    
+    const totalSavings = goals.reduce((sum, goal) => 
+      sum + toNumber(goal.current_amount, 0), 0
+    )
+    
+    const savingsDepositTransactions = transactions.filter(t => t.type === 'savings_deposit')
+    const savingsDeposits = savingsDepositTransactions
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    console.log('  Total savings from goals:', totalSavings)
+    console.log('  Savings deposits:', savingsDeposits, savingsDepositTransactions)
+    
+    const discipline = totalIncome > 0 
+      ? Math.min(100, ((totalSavings + savingsDeposits) / totalIncome) * 100)
+      : 0
+    
+    console.log('  Discipline result:', discipline, '%')
+
+    // 2. Стабильность (регулярность транзакций)
+    const transactionDates = transactions.map(t => {
+      const date = new Date(t.created_at)
+      return date.toDateString()
+    })
+    const uniqueDays = new Set(transactionDates).size
+    const stability = Math.min(100, (uniqueDays / 30) * 100)
+    
+    console.log('Stability calculation:')
+    console.log('  Unique days:', uniqueDays, 'out of 30')
+    console.log('  Stability result:', stability, '%')
+
+    // 3. Склонность к риску (на основе категорий)
+    const entertainmentCategories = ['развлечения', 'entertainment', 'игры', 'хобби', 'отдых']
+    const expenseTransactions = transactions.filter(t => t.type === 'expense')
+    const totalExpenses = expenseTransactions
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    const entertainmentExpenses = expenseTransactions
+      .filter(t => {
+        const desc = (t.description || '').toLowerCase()
+        const matches = entertainmentCategories.some(cat => desc.includes(cat))
+        if (matches) console.log('  Entertainment expense found:', desc, t.amount)
+        return matches
+      })
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    const riskTendency = totalExpenses > 0 
+      ? (entertainmentExpenses / totalExpenses) * 100
+      : 0
+    
+    console.log('Risk calculation:')
+    console.log('  Total expenses:', totalExpenses, expenseTransactions)
+    console.log('  Entertainment expenses:', entertainmentExpenses)
+    console.log('  Risk result:', riskTendency, '%')
+
+    // 4. Финансовый IQ (на основе квестов)
+    const completedQuests = questProgress.filter(q => q.completed).length
+    const totalQuests = questProgress.length
+    const financialIQ = totalQuests > 0 
+      ? (completedQuests / totalQuests) * 100
+      : 0
+    
+    console.log('Financial IQ calculation:')
+    console.log('  Quest progress:', questProgress)
+    console.log('  Completed:', completedQuests, 'Total:', totalQuests)
+    console.log('  Financial IQ result:', financialIQ, '%')
+
+    // Определяем профиль
+    let profile = 'Новичок'
+    let profileDescription = 'Ты только начинаешь свой финансовый путь'
+    
+    if (discipline >= 20 && stability >= 50 && financialIQ >= 50) {
+      profile = 'Стратег'
+      profileDescription = 'Ты отлично планируешь и контролируешь свои финансы'
+    } else if (riskTendency > 40 && discipline < 15) {
+      profile = 'Импульсивный'
+      profileDescription = 'Ты склонен к спонтанным тратам, попробуй больше планировать'
+    } else if (discipline >= 15 && financialIQ >= 40) {
+      profile = 'Инвестор'
+      profileDescription = 'Ты понимаешь важность накоплений и инвестиций'
+    } else if (stability >= 60) {
+      profile = 'Стабильный'
+      profileDescription = 'Ты регулярно управляешь финансами'
+    }
+
+    return {
+      discipline: Math.round(discipline),
+      stability: Math.round(stability),
+      riskTendency: Math.round(riskTendency),
+      financialIQ: Math.round(financialIQ),
+      profile,
+      profileDescription,
+    }
+  }
+
+  const calculate30DayStats = (recentTransactions: any[], allTransactions: any[], goals: any[]) => {
+    const now = new Date()
+    const thirtyDaysAgo = new Date(now)
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const sixtyDaysAgo = new Date(now)
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
+
+    // Транзакции за последние 30 дней
+    const last30Days = recentTransactions.filter(t => 
+      new Date(t.created_at) >= thirtyDaysAgo
+    )
+
+    // Транзакции за предыдущие 30 дней (31-60 дней назад)
+    const previous30Days = allTransactions.filter(t => {
+      const date = new Date(t.created_at)
+      return date >= sixtyDaysAgo && date < thirtyDaysAgo
+    })
+
+    // График динамики баланса (по дням)
+    // Сначала находим начальный баланс (30 дней назад)
+    const sortedTransactions = [...last30Days].sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    )
+    
+    // Начальный баланс = текущий баланс - все изменения за 30 дней
+    let initialBalance = userData?.balance || 0
+    sortedTransactions.forEach(t => {
+      if (t.type === 'income') {
+        initialBalance -= Math.abs(toNumber(t.amount, 0))
+      } else if (t.type === 'expense' || t.type === 'savings_deposit') {
+        initialBalance += Math.abs(toNumber(t.amount, 0))
+      }
+    })
+
+    const balanceHistory: any[] = []
+    let runningBalance = initialBalance
+    
+    // Идем от 30 дней назад до сегодня
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(thirtyDaysAgo)
+      date.setDate(date.getDate() + i)
+      date.setHours(0, 0, 0, 0)
+      
+      const dayTransactions = sortedTransactions.filter(t => {
+        const txDate = new Date(t.created_at)
+        txDate.setHours(0, 0, 0, 0)
+        return txDate.getTime() === date.getTime()
+      })
+
+      dayTransactions.forEach(t => {
+        if (t.type === 'income') {
+          runningBalance += Math.abs(toNumber(t.amount, 0))
+        } else if (t.type === 'expense' || t.type === 'savings_deposit') {
+          runningBalance -= Math.abs(toNumber(t.amount, 0))
+        }
+      })
+
+      balanceHistory.push({
+        date: date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }),
+        balance: Math.max(0, runningBalance), // Не показываем отрицательный баланс
+      })
+    }
+
+    // Рост накоплений
+    const currentSavings = goals.reduce((sum, goal) => 
+      sum + toNumber(goal.current_amount, 0), 0
+    )
+    
+    const savingsDeposits30Days = last30Days
+      .filter(t => t.type === 'savings_deposit')
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    const savingsDepositsPrevious = previous30Days
+      .filter(t => t.type === 'savings_deposit')
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    const savingsGrowth = savingsDepositsPrevious > 0
+      ? ((savingsDeposits30Days - savingsDepositsPrevious) / savingsDepositsPrevious) * 100
+      : savingsDeposits30Days > 0 ? 100 : 0
+
+    // Сравнение с прошлым периодом
+    const income30Days = last30Days
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    const incomePrevious = previous30Days
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    const expense30Days = last30Days
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+    
+    const expensePrevious = previous30Days
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
+
+    // Streak (дни активности подряд)
+    const activityDates = new Set(
+      last30Days.map(t => {
+        const date = new Date(t.created_at)
+        return date.toDateString()
+      })
+    )
+    
+    let streak = 0
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(today)
+      checkDate.setDate(checkDate.getDate() - i)
+      if (activityDates.has(checkDate.toDateString())) {
+        streak++
+      } else {
+        break
+      }
+    }
+
+    return {
+      balanceHistory,
+      savingsGrowth: Math.round(savingsGrowth),
+      currentSavings,
+      income30Days,
+      incomePrevious,
+      expense30Days,
+      expensePrevious,
+      incomeChange: incomePrevious > 0 
+        ? ((income30Days - incomePrevious) / incomePrevious) * 100 
+        : income30Days > 0 ? 100 : 0,
+      expenseChange: expensePrevious > 0
+        ? ((expense30Days - expensePrevious) / expensePrevious) * 100
+        : expense30Days > 0 ? 100 : 0,
+      streak,
+    }
+  }
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'ru' ? 'en' : 'ru'
@@ -130,7 +495,7 @@ export default function DashboardPage() {
       {showOnboarding && (
         <Onboarding onComplete={() => setShowOnboarding(false)} />
       )}
-    <main className="min-h-screen pb-12">
+      <main className="min-h-screen pb-12">
       {/* Navigation */}
       <nav className="glass border-b border-[var(--card-border)] sticky top-0 z-50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -243,6 +608,134 @@ export default function DashboardPage() {
                   <span>{t('dashboard.financialRating')}: Отличный</span>
                 </div>
               </div>
+            </Card>
+          </motion.div>
+
+          {/* Финансовый рейтинг */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <Card glow className="bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="text-primary" size={24} />
+                  <h2 className="text-2xl font-bold">Финансовый профиль</h2>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fetchFinancialData()}
+                  title="Обновить данные"
+                >
+                  <RefreshCw size={18} />
+                </Button>
+              </div>
+
+              {loadingStats ? (
+                <div className="flex items-center justify-center py-12">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
+                  />
+                </div>
+              ) : (
+                <>
+                {/* Профиль пользователя */}
+                <div className="mb-6 p-4 rounded-xl bg-white/50 dark:bg-gray-800/50 border-2 border-primary/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-bold">Твой профиль: {financialRating.profile}</h3>
+                    <Badge variant="success" className="text-sm">
+                      {financialRating.profile}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {financialRating.profileDescription}
+                  </p>
+                </div>
+
+                {/* Метрики */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-xl bg-white/50 dark:bg-gray-800/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="text-green-500" size={18} />
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Дисциплина
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {financialRating.discipline}%
+                    </div>
+                    <ProgressBar 
+                      value={financialRating.discipline} 
+                      max={100} 
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Накопления от дохода
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white/50 dark:bg-gray-800/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="text-blue-500" size={18} />
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Стабильность
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {financialRating.stability}%
+                    </div>
+                    <ProgressBar 
+                      value={financialRating.stability} 
+                      max={100} 
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Регулярность активности
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white/50 dark:bg-gray-800/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="text-orange-500" size={18} />
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Риск
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      {financialRating.riskTendency}%
+                    </div>
+                    <ProgressBar 
+                      value={financialRating.riskTendency} 
+                      max={100} 
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Склонность к риску
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white/50 dark:bg-gray-800/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Brain className="text-purple-500" size={18} />
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Финансовый IQ
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {financialRating.financialIQ}%
+                    </div>
+                    <ProgressBar 
+                      value={financialRating.financialIQ} 
+                      max={100} 
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      По квестам
+                    </p>
+                  </div>
+                </div>
+                </>
+              )}
             </Card>
           </motion.div>
 
@@ -367,7 +860,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Stats Grid */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card>
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('common.balance')}</div>
               <div className="text-3xl font-bold">
@@ -382,6 +875,152 @@ export default function DashboardPage() {
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('common.xp')}</div>
               <div className="text-3xl font-bold">{xp}</div>
               <ProgressBar value={xpInLevel} max={100} className="mt-3" />
+            </Card>
+          </motion.div>
+
+          {/* Статистика за 30 дней */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <Card glow>
+              <div className="flex items-center gap-2 mb-6">
+                <BarChart3 className="text-primary" size={24} />
+                <h2 className="text-2xl font-bold">Статистика за 30 дней</h2>
+              </div>
+
+              {loadingStats ? (
+                <div className="flex items-center justify-center py-12">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
+                  />
+                </div>
+              ) : stats30Days ? (
+                <>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* График динамики баланса */}
+                  <div className="lg:col-span-2 mb-6">
+                    <h3 className="text-lg font-semibold mb-4">Динамика баланса</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <LineChart data={stats30Days.balanceHistory}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis 
+                          dataKey="date" 
+                          tick={{ fontSize: 12 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '8px'
+                          }}
+                          formatter={(value: any) => [`${formatBalanceNumber(value)} ₽`, 'Баланс']}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="balance" 
+                          stroke="#50B848" 
+                          strokeWidth={2}
+                          dot={{ fill: '#50B848', r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Рост накоплений */}
+                  <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="text-green-600 dark:text-green-400" size={20} />
+                      <h3 className="text-lg font-semibold">Рост накоплений</h3>
+                    </div>
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                      {stats30Days.savingsGrowth > 0 ? '+' : ''}{stats30Days.savingsGrowth}%
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Текущие накопления: {formatBalanceNumber(stats30Days.currentSavings)} ₽
+                    </p>
+                  </Card>
+
+                  {/* Streak */}
+                  <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Flame className="text-orange-600 dark:text-orange-400" size={20} />
+                      <h3 className="text-lg font-semibold">Дни активности</h3>
+                    </div>
+                    <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                      {stats30Days.streak} {stats30Days.streak === 1 ? 'день' : stats30Days.streak < 5 ? 'дня' : 'дней'}
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Подряд активен
+                    </p>
+                  </Card>
+                </div>
+
+                {/* Сравнение с прошлым периодом */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <Card className="bg-blue-50 dark:bg-blue-900/20">
+                    <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                      Доходы
+                    </h3>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-2xl font-bold">
+                        {formatBalanceNumber(stats30Days.income30Days)} ₽
+                      </span>
+                      <span className={`text-sm font-semibold ${
+                        stats30Days.incomeChange >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {stats30Days.incomeChange >= 0 ? '+' : ''}{stats30Days.incomeChange.toFixed(1)}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      За предыдущий период: {formatBalanceNumber(stats30Days.incomePrevious)} ₽
+                    </p>
+                  </Card>
+
+                  <Card className="bg-red-50 dark:bg-red-900/20">
+                    <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                      Расходы
+                    </h3>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-2xl font-bold">
+                        {formatBalanceNumber(stats30Days.expense30Days)} ₽
+                      </span>
+                      <span className={`text-sm font-semibold ${
+                        stats30Days.expenseChange <= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {stats30Days.expenseChange >= 0 ? '+' : ''}{stats30Days.expenseChange.toFixed(1)}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      За предыдущий период: {formatBalanceNumber(stats30Days.expensePrevious)} ₽
+                    </p>
+                  </Card>
+                </div>
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <BarChart3 className="mx-auto mb-4 text-gray-400" size={48} />
+                  <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                    Недостаточно данных
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Для отображения статистики за 30 дней необходимо создать транзакции.
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    Попробуйте получить доход или создать цель накоплений
+                  </p>
+                </div>
+              )}
             </Card>
           </motion.div>
         </motion.div>
@@ -429,6 +1068,9 @@ export default function DashboardPage() {
                 type: 'success',
                 duration: 4000,
               })
+
+              // Обновляем финансовые данные после получения дохода
+              await fetchFinancialData()
 
               setIncomeModalOpen(false)
               setIncomeAmount('')
