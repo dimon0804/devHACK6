@@ -286,6 +286,66 @@ export default function DashboardPage() {
               </div>
             </Card>
 
+            <Card hover onClick={() => router.push('/quizzes')} className="group cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-yellow-500/10 rounded-xl">
+                      <Trophy className="text-yellow-600 dark:text-yellow-400" size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold">{t('quizzes.title')}</h3>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    {t('quizzes.subtitle')}
+                  </p>
+                  <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
+                    {t('quizzes.startQuiz')}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Education Section */}
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card hover onClick={() => router.push('/guided')} className="group cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-blue-500/10 rounded-xl">
+                      <Target className="text-blue-600 dark:text-blue-400" size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold">{t('guided.title')}</h3>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    {t('guided.subtitle')}
+                  </p>
+                  <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
+                    {t('guided.startGuidedMode')}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            <Card hover onClick={() => router.push('/badges')} className="group cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-purple-500/10 rounded-xl">
+                      <Trophy className="text-purple-600 dark:text-purple-400" size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold">{t('badges.title')}</h3>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    {t('badges.subtitle')}
+                  </p>
+                  <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
+                    {t('badges.title')}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
             <Card hover onClick={() => router.push('/history')} className="group cursor-pointer">
               <div className="flex items-center justify-between">
                 <div>
