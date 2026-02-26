@@ -177,6 +177,7 @@
   "badges": {
     "title": "Мои бейджи",
     "subtitle": "Достижения и награды",
+    "viewBadges": "Мои бейджи",
     "earned": "Получено",
     "notEarned": "Не получено",
     "earnedAt": "Получен",

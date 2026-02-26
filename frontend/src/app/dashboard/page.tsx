@@ -247,7 +247,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Quick Actions */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card hover onClick={() => router.push('/budget')} className="group cursor-pointer">
               <div className="flex items-center justify-between">
                 <div>
@@ -304,6 +304,25 @@ export default function DashboardPage() {
                 </div>
               </div>
             </Card>
+
+            <Card hover onClick={() => router.push('/history')} className="group cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-primary/10 rounded-xl">
+                      <History className="text-primary" size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold">{t('dashboard.viewHistory')}</h3>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    {t('history.subtitle')}
+                  </p>
+                  <Button variant="primary" size="sm" className="group-hover:scale-105 transition-transform">
+                    {t('history.title')}
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </motion.div>
 
           {/* Education Section */}
@@ -340,50 +359,9 @@ export default function DashboardPage() {
                     {t('badges.subtitle')}
                   </p>
                   <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
-                    {t('badges.title')}
+                    {t('badges.viewBadges')}
                   </Button>
                 </div>
-              </div>
-            </Card>
-
-            <Card hover onClick={() => router.push('/history')} className="group cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="p-2 bg-primary/10 rounded-xl">
-                      <History className="text-primary" size={24} />
-                    </div>
-                    <h3 className="text-xl font-bold">{t('dashboard.viewHistory')}</h3>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                    {t('history.subtitle')}
-                  </p>
-                  <Button variant="primary" size="sm" className="group-hover:scale-105 transition-transform">
-                    {t('history.title')}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Quests Section */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <Card hover onClick={() => router.push('/quests')} className="group cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-xl">
-                    <Trophy className="text-yellow-500 dark:text-yellow-400" size={28} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-1">Квесты и достижения</h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Выполняйте задания и получайте опыт
-                    </p>
-                  </div>
-                </div>
-                <Button variant="primary" size="sm" className="group-hover:scale-105 transition-transform">
-                  Открыть квесты
-                </Button>
               </div>
             </Card>
           </motion.div>

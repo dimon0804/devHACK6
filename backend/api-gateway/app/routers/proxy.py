@@ -33,6 +33,12 @@ async def _proxy_request(service: str, path: str, request: Request):
             url = f"{base_url}/api/v1/{service}/{path}"
         else:
             url = f"{base_url}/api/v1/{service}"
+    elif service in ["quizzes", "badges", "guided"]:
+        # Education service endpoints are already under /api/v1/
+        if path:
+            url = f"{base_url}/api/v1/{service}/{path}"
+        else:
+            url = f"{base_url}/api/v1/{service}"
     else:
         # For categories, budget, savings - they're already under /api/v1 in game-service
         if path:
