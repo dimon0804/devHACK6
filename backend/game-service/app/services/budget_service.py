@@ -33,19 +33,11 @@ class BudgetService:
                 xp_reward = BudgetService.XP_REWARD_BALANCED
                 success = True
 
-        balance_updated = False
-        # Always try to update balance and add XP, even if budget is not perfectly balanced
+        # Планирование бюджета - это только создание плана, не изменение баланса
+        # Баланс будет изменяться только при реальных операциях (получение дохода, траты)
         async with httpx.AsyncClient() as client:
             try:
-                balance_response = await client.post(
-                    f"{settings.USER_SERVICE_URL}/api/v1/users/balance",
-                    headers={"Authorization": f"Bearer {token}"},
-                    json={"amount": str(request.income)},
-                    timeout=5.0
-                )
-                if balance_response.status_code == 200:
-                    balance_updated = True
-
+                # Начисляем XP за правильное планирование
                 xp_response = await client.post(
                     f"{settings.USER_SERVICE_URL}/api/v1/users/xp",
                     headers={"Authorization": f"Bearer {token}"},
@@ -53,48 +45,44 @@ class BudgetService:
                     timeout=5.0
                 )
 
-                # Create transaction - always try to save transaction history
+                # Создаем транзакцию только для записи плана (не меняет баланс)
                 try:
                     transaction_url = f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions"
-                    transaction_payload = {
+                    
+                    # Создаем транзакцию-план для дохода (тип budget_plan для отличия от реальных транзакций)
+                    income_transaction = {
                         "type": "income",
                         "amount": str(request.income),
-                        "description": "Планирование бюджета"
+                        "description": f"📋 План бюджета: Доход {request.income} ₽"
                     }
-                    print(f"Creating transaction: {transaction_url} with payload: {transaction_payload}")
-                    transaction_response = await client.post(
+                    await client.post(
                         transaction_url,
                         headers={"Authorization": f"Bearer {token}"},
-                        json=transaction_payload,
+                        json=income_transaction,
                         timeout=5.0
                     )
-                    print(f"Transaction response: {transaction_response.status_code}, {transaction_response.text}")
-                    if transaction_response.status_code != 201:
-                        print(f"Failed to create transaction: {transaction_response.status_code}, {transaction_response.text}")
-                except Exception as tx_error:
-                    print(f"Error creating transaction: {tx_error}", exc_info=True)
-            except httpx.RequestError as e:
-                # Log error but don't fail the request
-                print(f"Error updating balance/XP: {e}")
-                # Still try to create transaction even if balance/XP update failed
-                try:
-                    async with httpx.AsyncClient() as tx_client:
-                        await tx_client.post(
-                            f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions",
+                    
+                    # Создаем транзакции-планы для каждой категории
+                    for category in request.categories:
+                        category_transaction = {
+                            "type": "expense",
+                            "amount": str(category.amount),
+                            "description": f"📋 План бюджета: {category.name} - {category.amount} ₽"
+                        }
+                        await client.post(
+                            transaction_url,
                             headers={"Authorization": f"Bearer {token}"},
-                            json={
-                                "type": "income",
-                                "amount": str(request.income),
-                                "description": "Планирование бюджета"
-                            },
+                            json=category_transaction,
                             timeout=5.0
                         )
                 except Exception as tx_error:
-                    print(f"Error creating transaction after failure: {tx_error}")
+                    print(f"Error creating plan transactions: {tx_error}", exc_info=True)
+            except httpx.RequestError as e:
+                print(f"Error updating XP: {e}")
 
         return {
             "success": success,
             "xp_reward": xp_reward,
             "feedback": feedback,
-            "balance_updated": balance_updated
+            "balance_updated": False  # Планирование не меняет баланс
         }

@@ -2,9 +2,12 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from decimal import Decimal
 import httpx
+import logging
 from app.models.goal import Goal
 from app.schemas.savings import GoalCreate, SavingsDeposit
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class SavingsService:
@@ -14,6 +17,7 @@ class SavingsService:
     @staticmethod
     def create_goal(db: Session, user_id: int, goal_data: GoalCreate) -> Goal:
         try:
+            logger.info(f"Creating goal for user {user_id}: title={goal_data.title}, target_amount={goal_data.target_amount}")
             goal = Goal(
                 user_id=user_id,
                 title=goal_data.title,
@@ -23,9 +27,11 @@ class SavingsService:
             db.add(goal)
             db.commit()
             db.refresh(goal)
+            logger.info(f"Goal created successfully: id={goal.id}")
             return goal
         except Exception as e:
             db.rollback()
+            logger.error(f"Failed to create goal: {str(e)}", exc_info=True)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Failed to create goal: {str(e)}"

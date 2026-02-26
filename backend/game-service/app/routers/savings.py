@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from typing import Optional
+import logging
 
 from app.core.database import get_db
 from app.core.auth import verify_token
 from app.services.savings_service import SavingsService
 from app.schemas.savings import GoalCreate, GoalResponse, SavingsDeposit, SavingsInterestResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -30,9 +33,29 @@ async def create_goal(
     user_and_token: tuple[int, str] = Depends(get_current_user_id),
     db: Session = Depends(get_db)
 ):
-    user_id, _ = user_and_token
-    goal = SavingsService.create_goal(db, user_id, goal_data)
-    return goal
+    try:
+        user_id, _ = user_and_token
+        goal = SavingsService.create_goal(db, user_id, goal_data)
+        # Явно конвертируем в dict для сериализации
+        return GoalResponse(
+            id=goal.id,
+            user_id=goal.user_id,
+            title=goal.title,
+            target_amount=goal.target_amount,
+            current_amount=goal.current_amount,
+            completed=goal.completed,
+            created_at=goal.created_at
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        logger.error(f"Error in create_goal: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create goal: {str(e)}"
+        )
 
 
 @router.get("/goals", response_model=list[GoalResponse])
