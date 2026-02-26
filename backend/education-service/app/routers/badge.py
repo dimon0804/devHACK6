@@ -47,3 +47,38 @@ async def get_my_badges(
     """Get user's earned badges"""
     user_badges = BadgeService.get_user_badges(db, user_id)
     return user_badges
+
+
+@router.post("/check")
+async def check_and_award_badge(
+    request_data: dict,
+    user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """Check and award badge based on condition"""
+    badge_type = request_data.get("badge_type")
+    condition = request_data.get("condition", {})
+    
+    if not badge_type:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="badge_type is required"
+        )
+    
+    badge = BadgeService.check_and_award_badge(
+        db, user_id, badge_type, condition
+    )
+    
+    if badge:
+        return {
+            "awarded": True,
+            "badge": {
+                "id": badge.id,
+                "name": badge.name,
+                "title": badge.title,
+                "description": badge.description,
+                "icon": badge.icon
+            }
+        }
+    
+    return {"awarded": False}

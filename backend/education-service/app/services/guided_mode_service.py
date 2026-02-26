@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import Dict, List, Optional
 from fastapi import HTTPException, status
 
@@ -79,7 +80,6 @@ class GuidedModeService:
 
         if action == "create_budget":
             # Check if user has any budget transactions
-            from sqlalchemy import text
             result = db.execute(
                 text("SELECT COUNT(*) FROM transactions WHERE user_id = :user_id AND type = 'income'"),
                 {"user_id": user_id}
@@ -89,7 +89,6 @@ class GuidedModeService:
 
         elif action == "save_20_percent":
             # Check if user has savings deposits
-            from sqlalchemy import text
             result = db.execute(
                 text("SELECT COUNT(*) FROM transactions WHERE user_id = :user_id AND type = 'savings_deposit'"),
                 {"user_id": user_id}
@@ -108,7 +107,6 @@ class GuidedModeService:
 
         elif action == "complete_goal":
             # Check if user has completed goals
-            from sqlalchemy import text
             result = db.execute(
                 text("SELECT COUNT(*) FROM goals WHERE user_id = :user_id AND completed = true"),
                 {"user_id": user_id}

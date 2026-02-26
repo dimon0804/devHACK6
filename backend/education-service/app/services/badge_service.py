@@ -69,5 +69,37 @@ class BadgeService:
                     # Return badge object
                     badge = db.query(Badge).filter(Badge.id == badge_id).first()
                     return badge
+            
+            elif condition.get('type') == 'goal_completed':
+                # Award badge for completing any goal
+                from datetime import datetime
+                user_badge = UserBadge(
+                    user_id=user_id,
+                    badge_id=badge_id,
+                    earned_at=datetime.utcnow()
+                )
+                db.add(user_badge)
+                db.commit()
+                db.refresh(user_badge)
+                
+                # Return badge object
+                badge = db.query(Badge).filter(Badge.id == badge_id).first()
+                return badge
+            
+            elif condition.get('type') == 'budget_created':
+                # Award badge for creating first budget
+                from datetime import datetime
+                user_badge = UserBadge(
+                    user_id=user_id,
+                    badge_id=badge_id,
+                    earned_at=datetime.utcnow()
+                )
+                db.add(user_badge)
+                db.commit()
+                db.refresh(user_badge)
+                
+                # Return badge object
+                badge = db.query(Badge).filter(Badge.id == badge_id).first()
+                return badge
 
         return None
