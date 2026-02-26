@@ -17,20 +17,26 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        'goals',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
-        sa.Column('title', sa.String(), nullable=False),
-        sa.Column('target_amount', sa.Numeric(10, 2), nullable=False),
-        sa.Column('current_amount', sa.Numeric(10, 2), nullable=False, server_default='0.00'),
-        sa.Column('completed', sa.Boolean(), nullable=False, server_default='false'),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_goals_id'), 'goals', ['id'], unique=False)
-    op.create_index(op.f('ix_goals_user_id'), 'goals', ['user_id'], unique=False)
+    from sqlalchemy import inspect
+    conn = op.get_bind()
+    inspector = inspect(conn)
+    existing_tables = inspector.get_table_names()
+
+    if 'goals' not in existing_tables:
+        op.create_table(
+            'goals',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('user_id', sa.Integer(), nullable=False),
+            sa.Column('title', sa.String(), nullable=False),
+            sa.Column('target_amount', sa.Numeric(10, 2), nullable=False),
+            sa.Column('current_amount', sa.Numeric(10, 2), nullable=False, server_default='0.00'),
+            sa.Column('completed', sa.Boolean(), nullable=False, server_default='false'),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+            sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_goals_id'), 'goals', ['id'], unique=False)
+        op.create_index(op.f('ix_goals_user_id'), 'goals', ['user_id'], unique=False)
 
 
 def downgrade() -> None:
