@@ -27,6 +27,20 @@ import {
 
 const COLORS = ['#50B848', '#BDCBEC', '#FF6B6B', '#4ECDC4', '#FFE66D', '#A8E6CF']
 
+// Функция для перевода названий категорий на русский
+const translateCategory = (category: string, t: any): string => {
+  const categoryMap: Record<string, string> = {
+    'income': t('history.income'),
+    'expense': t('history.expense'),
+    'savings_deposit': 'Пополнение накоплений',
+    'goal_completed': 'Цель достигнута',
+    'interest': 'Проценты',
+    'budget_planning': 'Планирование бюджета',
+    'other': 'Прочее',
+  }
+  return categoryMap[category.toLowerCase()] || category
+}
+
 export default function HistoryPage() {
   const { t } = useTranslation()
   const [transactions, setTransactions] = useState<any[]>([])
@@ -60,7 +74,8 @@ export default function HistoryPage() {
     if (filter === 'all') return true
     const amount = toNumber(t.amount, 0)
     if (filter === 'income') return amount > 0
-    return amount < 0
+    if (filter === 'expense') return amount < 0
+    return true
   })
 
   // Prepare data for charts
@@ -87,20 +102,45 @@ export default function HistoryPage() {
     return { date, income, expense }
   })
 
+  // Группируем категории с учетом знака суммы (доходы/расходы)
   const categoryData = filteredTransactions.reduce((acc: any, t) => {
+    const amount = toNumber(t.amount, 0)
+    const isIncome = amount > 0
     const type = t.type || 'other'
-    const amount = Math.abs(toNumber(t.amount, 0))
-    if (!acc[type]) {
-      acc[type] = 0
+    const amountAbs = Math.abs(amount)
+    
+    // Создаем уникальный ключ для категории с учетом типа (доход/расход)
+    const categoryKey = `${type}_${isIncome ? 'income' : 'expense'}`
+    
+    if (!acc[categoryKey]) {
+      acc[categoryKey] = {
+        type: type,
+        isIncome: isIncome,
+        amount: 0
+      }
     }
-    acc[type] += amount
+    acc[categoryKey].amount += amountAbs
     return acc
   }, {})
 
   const pieData = Object.entries(categoryData)
-    .map(([name, value]) => ({ name, value }))
+    .map(([key, data]: [string, any]) => {
+      const categoryName = translateCategory(data.type, t)
+      // Упрощаем названия - убираем дублирование, тип виден по цвету
+      const shortName = categoryName.length > 15 
+        ? categoryName.substring(0, 15) + '...' 
+        : categoryName
+      return {
+        name: shortName, // Короткое название для метки на диаграмме
+        fullName: `${categoryName} (${data.isIncome ? t('history.income') : t('history.expense')})`, // Полное название для легенды
+        originalName: data.type,
+        value: data.amount,
+        isIncome: data.isIncome
+      }
+    })
+    .filter(item => item.value > 0) // Убираем нулевые значения
     .sort((a, b) => (b.value as number) - (a.value as number))
-    .slice(0, 6)
+    .slice(0, 10) // Увеличиваем количество категорий для лучшего отображения
 
   const totalIncome = filteredTransactions
     .filter((t) => toNumber(t.amount, 0) > 0)
@@ -280,21 +320,61 @@ export default function HistoryPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
+                      label={({ percent }) => {
+                        const percentValue = (percent * 100).toFixed(0)
+                        // Показываем только процент на диаграмме, если больше 2%
+                        return parseFloat(percentValue) >= 2 ? `${percentValue}%` : ''
+                      }}
+                      outerRadius={100}
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
+                      {pieData.map((entry, index) => {
+                        // Используем зеленые оттенки для доходов, красные для расходов
+                        const incomeColors = ['#50B848', '#6BC85A', '#7DD86C', '#8EE87E', '#A0F890']
+                        const expenseColors = ['#FF6B6B', '#FF8E8E', '#FFB3B3', '#FFD4D4', '#FFE5E5']
+                        const color = entry.isIncome 
+                          ? incomeColors[index % incomeColors.length]
+                          : expenseColors[index % expenseColors.length]
+                        return (
+                          <Cell key={`cell-${index}`} fill={color} />
+                        )
+                      })}
                     </Pie>
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'var(--bg-primary)',
-                        border: '1px solid var(--card-border)',
-                        borderRadius: '12px',
+                      formatter={(value: any) => {
+                        return [`${formatBalanceNumber(value)} ₽`, '']
                       }}
+                      labelFormatter={(label, payload: any) => {
+                        if (payload && payload.length > 0) {
+                          const entry = pieData.find(p => p.value === payload[0].value)
+                          return entry?.fullName || label
+                        }
+                        return label
+                      }}
+                      contentStyle={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        color: '#ffffff',
+                      }}
+                      labelStyle={{
+                        color: '#ffffff',
+                        fontWeight: 'bold',
+                        marginBottom: '8px',
+                      }}
+                      itemStyle={{
+                        color: '#50B848',
+                        fontWeight: '600',
+                      }}
+                    />
+                    <Legend 
+                      formatter={(value: any) => {
+                        const dataEntry = pieData.find(p => p.name === value)
+                        return dataEntry?.fullName || value
+                      }}
+                      wrapperStyle={{ paddingTop: '20px' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>

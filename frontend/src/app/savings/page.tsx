@@ -254,22 +254,17 @@ export default function SavingsPage() {
           )}
 
           {/* Floating Action Button */}
-          <motion.div
+          <motion.button
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="fixed bottom-8 right-8 z-50"
+            onClick={() => setIsModalOpen(true)}
+            className="fixed bottom-8 right-8 z-50 w-16 h-16 rounded-full bg-gradient-to-r from-primary to-primary-600 text-white shadow-glow-lg hover:shadow-glow-xl transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+            title={t('savings.createGoal')}
           >
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              variant="primary"
-              size="lg"
-              className="rounded-full w-16 h-16 shadow-glow-lg p-0 flex items-center justify-center"
-            >
-              <Plus size={24} className="text-white" />
-            </Button>
-          </motion.div>
+            <Plus size={32} strokeWidth={3} className="text-white" />
+          </motion.button>
         </motion.div>
       </div>
 
@@ -354,7 +349,9 @@ export default function SavingsPage() {
           </Button>
         </form>
       </Modal>
-      <Footer />
+      <div className="mt-16">
+        <Footer />
+      </div>
     </main>
   )
 }
