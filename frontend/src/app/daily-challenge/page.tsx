@@ -59,7 +59,7 @@ export default function DailyChallengePage() {
 
     if (userProgress?.completed) {
       return (
-        <Button variant="success" disabled className="w-full">
+        <Button variant="primary" disabled className="w-full bg-green-500 hover:bg-green-600">
           <CheckCircle size={18} className="mr-2" />
           Задание выполнено!
         </Button>
