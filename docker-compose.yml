@@ -280,7 +280,7 @@ services:
       dockerfile: Dockerfile
     container_name: fintech_frontend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:${API_GATEWAY_PORT:-8000}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     networks:
