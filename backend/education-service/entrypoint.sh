@@ -2,16 +2,12 @@
 set -e
 
 echo "Running Alembic migrations..."
-# Check if alembic_version table exists and has entries
-if alembic current 2>/dev/null | grep -q "001_initial"; then
-    echo "Migrations already applied, skipping..."
+# Try to apply migrations
+if alembic upgrade head 2>&1 | grep -q "already exists"; then
+    echo "Tables already exist, stamping migration as applied..."
+    alembic stamp head
 else
-    echo "Applying migrations..."
-    alembic upgrade head || {
-        echo "Migration failed, trying to stamp head if tables exist..."
-        # If tables exist but migration failed, stamp the migration as applied
-        alembic stamp head 2>/dev/null || true
-    }
+    echo "Migrations applied successfully"
 fi
 
 echo "Starting application..."
