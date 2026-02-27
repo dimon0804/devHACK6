@@ -16,6 +16,8 @@ SERVICE_ROUTES = {
     "quizzes": settings.EDUCATION_SERVICE_URL,
     "badges": settings.EDUCATION_SERVICE_URL,
     "guided": settings.EDUCATION_SERVICE_URL,
+    "achievements": settings.EDUCATION_SERVICE_URL,
+    "daily-challenges": settings.EDUCATION_SERVICE_URL,
 }
 
 
@@ -33,7 +35,7 @@ async def _proxy_request(service: str, path: str, request: Request):
             url = f"{base_url}/api/v1/{service}/{path}"
         else:
             url = f"{base_url}/api/v1/{service}"
-    elif service in ["quizzes", "badges", "guided"]:
+    elif service in ["quizzes", "badges", "guided", "achievements", "daily-challenges"]:
         # Education service endpoints are already under /api/v1/
         if path:
             url = f"{base_url}/api/v1/{service}/{path}"

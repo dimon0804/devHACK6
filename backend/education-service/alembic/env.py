@@ -11,6 +11,8 @@ from app.core.database import Base
 from app.core.config import settings
 from app.models.quiz import Quiz, Question, QuizProgress
 from app.models.badge import Badge, UserBadge
+from app.models.achievement import Achievement, UserAchievement
+from app.models.daily_challenge import DailyChallenge, DailyChallengeCompletion
 
 config = context.config
 

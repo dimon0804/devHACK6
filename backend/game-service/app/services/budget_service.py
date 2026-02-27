@@ -62,6 +62,32 @@ class BudgetService:
                         timeout=5.0
                     )
                     
+                    # Check for achievements and daily challenges
+                    try:
+                        # Check first budget achievement
+                        await client.post(
+                            f"{settings.EDUCATION_SERVICE_URL}/api/v1/achievements/check",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "achievement_type": "first_budget",
+                                "condition": {}
+                            },
+                            timeout=5.0
+                        )
+                        
+                        # Check daily challenge
+                        await client.post(
+                            f"{settings.EDUCATION_SERVICE_URL}/api/v1/daily-challenges/check",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "challenge_type": "create_budget",
+                                "condition_data": {}
+                            },
+                            timeout=5.0
+                        )
+                    except Exception:
+                        pass  # Don't fail if achievement check fails
+                    
                     # Создаем транзакции-планы для каждой категории
                     for category in request.categories:
                         category_transaction = {

@@ -157,6 +157,21 @@ class SavingsService:
                         )
                     except Exception:
                         pass
+                    
+                    # Check savings amount achievement
+                    try:
+                        total_savings = goal.current_amount
+                        await client.post(
+                            f"{settings.EDUCATION_SERVICE_URL}/api/v1/achievements/check",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "achievement_type": "savings_amount",
+                                "condition": {"current_amount": float(total_savings)}
+                            },
+                            timeout=5.0
+                        )
+                    except Exception:
+                        pass
             except httpx.RequestError:
                 pass
 
