@@ -9,10 +9,12 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Footer } from '@/components/layout/Footer'
 import { Sparkles, CheckCircle, TrendingUp, Target, Trophy } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
 
 export default function DemoPage() {
   const { t } = useTranslation()
   const router = useRouter()
+  const { setTokens, setUser } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [demoData, setDemoData] = useState<any>(null)
 
@@ -44,15 +46,28 @@ export default function DemoPage() {
       })
 
       const { access_token, refresh_token } = loginResponse.data
-      
-      // Store tokens
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('access_token', access_token)
-        localStorage.setItem('refresh_token', refresh_token)
-      }
+
+      // Сохраняем токены в authStore (автоматически кладёт в localStorage)
+      setTokens(access_token, refresh_token)
 
       // Populate demo data
       await populateDemoData(access_token)
+
+      // Подтягиваем профиль пользователя и сохраняем в store,
+      // чтобы дашборд и другие экраны сразу показали корректные данные
+      try {
+        const meResponse = await api.get('/api/v1/users/me')
+        setUser({
+          id: meResponse.data.id,
+          email: meResponse.data.email,
+          username: meResponse.data.username,
+          level: meResponse.data.level,
+          xp: meResponse.data.xp,
+          balance: meResponse.data.balance,
+        })
+      } catch (e) {
+        console.error('Failed to fetch demo user profile', e)
+      }
 
       router.push('/dashboard')
     } catch (err: any) {
