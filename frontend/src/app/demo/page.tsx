@@ -30,14 +30,15 @@ export default function DemoPage() {
     setLoading(true)
     try {
       // Create demo user
-      const demoEmail = `demo_${Date.now()}@finteen.demo`
+      const timestamp = Date.now()
+      const demoEmail = `demo_${timestamp}@finteen.test`
       const demoPassword = 'demo123456'
+      const demoUsername = `DemoUser_${timestamp}`
       
       const registerResponse = await api.post('/api/v1/auth/register', {
         email: demoEmail,
-        username: 'Demo User',
+        username: demoUsername,
         password: demoPassword,
-        age: 14
       })
 
       const loginResponse = await api.post('/api/v1/auth/login', {
