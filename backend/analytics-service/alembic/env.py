@@ -5,6 +5,9 @@ from alembic import context
 from app.core.config import settings
 from app.core.database import Base
 
+# Import all models to ensure they're registered with Base.metadata
+from app.models.analytics import AnalyticsEvent, AnalyticsAggregate
+
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
@@ -21,6 +24,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table="alembic_version_analytics"
     )
 
     with context.begin_transaction():
@@ -36,7 +40,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table="alembic_version_analytics"
         )
 
         with context.begin_transaction():
