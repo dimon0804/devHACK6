@@ -219,6 +219,7 @@ export default function DashboardPage() {
       const stats = calculate30DayStats(recentTransactions, allTransactions, loadedGoals)
       setStats30Days(stats || {
         balanceHistory: [],
+        activityDaysData: [],
         savingsGrowth: 0,
         currentSavings: 0,
         income30Days: 0,
@@ -929,36 +930,43 @@ export default function DashboardPage() {
                   {/* График динамики баланса */}
                   <div className="lg:col-span-2 mb-6">
                     <h3 className="text-lg font-semibold mb-4">Динамика баланса</h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={stats30Days.balanceHistory}>
-                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                        <XAxis 
-                          dataKey="date" 
-                          tick={{ fontSize: 12 }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={60}
-                        />
-                        <YAxis tick={{ fontSize: 12 }} />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'rgba(0, 0, 0, 0.9)', 
-                            color: '#FFFFFF',
-                            border: 'none',
-                            borderRadius: '8px'
-                          }}
-                          formatter={(value: any) => [`${formatBalanceNumber(value)} ₽`, 'Баланс']}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="balance" 
-                          stroke="#50B848" 
-                          strokeWidth={2}
-                          dot={{ fill: '#50B848', r: 4 }}
-                          activeDot={{ r: 6 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    {stats30Days.balanceHistory && stats30Days.balanceHistory.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={stats30Days.balanceHistory}>
+                          <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fontSize: 12 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                            interval="preserveStartEnd"
+                          />
+                          <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '8px'
+                            }}
+                            formatter={(value: any) => [`${formatBalanceNumber(value)} ₽`, 'Баланс']}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="balance" 
+                            stroke="#50B848" 
+                            strokeWidth={2}
+                            dot={{ fill: '#50B848', r: 3 }}
+                            activeDot={{ r: 5 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+                        <p>Нет данных за последние 30 дней</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Рост накоплений */}
