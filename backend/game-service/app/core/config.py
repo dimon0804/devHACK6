@@ -4,7 +4,7 @@ from typing import List
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    REDIS_URL: str = "redis://localhost:6379"
+    REDIS_URL: str = "redis://redis:6379"
     USER_SERVICE_URL: str = "http://user-service:8000"
     PROGRESS_SERVICE_URL: str = "http://progress-service:8000"
     EDUCATION_SERVICE_URL: str = "http://education-service:8000"

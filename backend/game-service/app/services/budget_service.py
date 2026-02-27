@@ -37,13 +37,24 @@ class BudgetService:
         # Баланс будет изменяться только при реальных операциях (получение дохода, траты)
         async with httpx.AsyncClient() as client:
             try:
-                # Начисляем XP за правильное планирование
-                xp_response = await client.post(
-                    f"{settings.USER_SERVICE_URL}/api/v1/users/xp",
-                    headers={"Authorization": f"Bearer {token}"},
-                    json={"xp": xp_reward},
-                    timeout=5.0
+                # Publish event for XP addition (event-based)
+                from app.core.events import event_publisher
+                await event_publisher.publish(
+                    'budget_planned',
+                    user_id,
+                    {'xp_reward': xp_reward, 'success': success}
                 )
+                
+                # Fallback: direct HTTP call if event publishing fails
+                try:
+                    xp_response = await client.post(
+                        f"{settings.USER_SERVICE_URL}/api/v1/users/xp",
+                        headers={"Authorization": f"Bearer {token}"},
+                        json={"xp": xp_reward},
+                        timeout=5.0
+                    )
+                except Exception:
+                    pass  # Event-based approach is primary
 
                 # Создаем транзакцию только для записи плана (не меняет баланс)
                 try:
