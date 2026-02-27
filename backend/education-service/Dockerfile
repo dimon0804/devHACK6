@@ -14,8 +14,8 @@ COPY . .
 
 ENV PATH=/root/.local/bin:$PATH
 
-RUN chmod +x entrypoint.sh || true
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh || true
 
 EXPOSE 8000
 
-CMD ["./entrypoint.sh"]
+CMD ["/bin/bash", "/app/entrypoint.sh"]
