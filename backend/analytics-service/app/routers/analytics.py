@@ -26,7 +26,8 @@ async def create_analytics_event(
         event_category=event.event_category,
         metadata=metadata
     )
-    return created_event
+    # Map event_data back to metadata for response
+    return AnalyticsEventResponse.from_orm(created_event)
 
 
 @router.get("/aggregated", response_model=AggregatedAnalyticsResponse)

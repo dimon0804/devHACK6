@@ -12,7 +12,7 @@ class AnalyticsService:
         event = AnalyticsEvent(
             event_type=event_type,
             event_category=event_category,
-            metadata=metadata or {}
+            event_data=metadata or {}  # Map metadata to event_data
         )
         db.add(event)
         db.commit()
@@ -26,12 +26,12 @@ class AnalyticsService:
         quiz_errors = db.execute(
             text("""
                 SELECT 
-                    metadata->>'quiz_id' as quiz_id,
+                    event_data->>'quiz_id' as quiz_id,
                     COUNT(*) FILTER (WHERE event_type = 'quiz_error') as error_count,
                     COUNT(*) FILTER (WHERE event_type = 'quiz_completed') as total_count
                 FROM analytics_events
                 WHERE event_category = 'quiz'
-                GROUP BY metadata->>'quiz_id'
+                GROUP BY event_data->>'quiz_id'
             """)
         ).fetchall()
         
@@ -69,11 +69,11 @@ class AnalyticsService:
         common_errors = db.execute(
             text("""
                 SELECT 
-                    metadata->>'error_type' as error_type,
+                    event_data->>'error_type' as error_type,
                     COUNT(*) as error_count
                 FROM analytics_events
                 WHERE event_type = 'error'
-                GROUP BY metadata->>'error_type'
+                GROUP BY event_data->>'error_type'
                 ORDER BY error_count DESC
                 LIMIT 10
             """)
@@ -108,7 +108,7 @@ class AnalyticsService:
             text("""
                 SELECT 
                     DATE(created_at) as date,
-                    COUNT(DISTINCT metadata->>'user_id') as active_users
+                    COUNT(DISTINCT event_data->>'user_id') as active_users
                 FROM analytics_events
                 WHERE created_at >= :start_date
                 GROUP BY DATE(created_at)
@@ -154,12 +154,12 @@ class AnalyticsService:
         quiz_errors = db.execute(
             text("""
                 SELECT 
-                    metadata->>'quiz_id' as quiz_id,
-                    metadata->>'question_id' as question_id,
+                    event_data->>'quiz_id' as quiz_id,
+                    event_data->>'question_id' as question_id,
                     COUNT(*) as error_count
                 FROM analytics_events
                 WHERE event_type = 'quiz_error'
-                GROUP BY metadata->>'quiz_id', metadata->>'question_id'
+                GROUP BY event_data->>'quiz_id', event_data->>'question_id'
                 ORDER BY error_count DESC
                 LIMIT 20
             """)
@@ -183,7 +183,7 @@ class AnalyticsService:
                     event_category,
                     COUNT(*) FILTER (WHERE event_type = 'scenario_success') as success,
                     COUNT(*) FILTER (WHERE event_type = 'scenario_failure') as failure,
-                    AVG((metadata->>'completion_time')::float) as avg_completion_time
+                    AVG((event_data->>'completion_time')::float) as avg_completion_time
                 FROM analytics_events
                 WHERE event_category IN ('budget', 'savings', 'quiz', 'antifraud')
                 GROUP BY event_category
