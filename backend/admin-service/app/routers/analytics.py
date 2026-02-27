@@ -3,78 +3,58 @@ from typing import Dict, Any
 import httpx
 from app.core.config import settings
 from app.core.auth import verify_admin_token
+from app.core.database import get_db
+from sqlalchemy import text
 
 router = APIRouter()
 
 
 @router.get("/dashboard")
 async def get_dashboard_stats(
-    token: str = Depends(verify_admin_token)
+    token: str = Depends(verify_admin_token),
+    db = Depends(get_db)
 ) -> Dict[str, Any]:
     """Get comprehensive dashboard statistics"""
-    async with httpx.AsyncClient() as client:
-        # Fetch data from all services
-        try:
-            # Users stats
-            users_response = await client.get(
-                f"{settings.USER_SERVICE_URL}/api/v1/users/stats",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=10.0
-            )
-            users_stats = users_response.json() if users_response.status_code == 200 else {}
-        except:
-            users_stats = {}
-        
-        try:
-            # Transactions stats
-            transactions_response = await client.get(
-                f"{settings.PROGRESS_SERVICE_URL}/api/v1/transactions/stats",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=10.0
-            )
-            transactions_stats = transactions_response.json() if transactions_response.status_code == 200 else {}
-        except:
-            transactions_stats = {}
-        
-        try:
-            # Quizzes stats
-            quizzes_response = await client.get(
-                f"{settings.EDUCATION_SERVICE_URL}/api/v1/quizzes/stats",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=10.0
-            )
-            quizzes_stats = quizzes_response.json() if quizzes_response.status_code == 200 else {}
-        except:
-            quizzes_stats = {}
-        
-        try:
-            # Goals stats
-            goals_response = await client.get(
-                f"{settings.GAME_SERVICE_URL}/api/v1/savings/stats",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=10.0
-            )
-            goals_stats = goals_response.json() if goals_response.status_code == 200 else {}
-        except:
-            goals_stats = {}
-        
-        try:
-            # Analytics aggregated data
-            analytics_response = await client.get(
-                f"{settings.ANALYTICS_SERVICE_URL}/api/v1/analytics/aggregated",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=10.0
-            )
-            analytics_data = analytics_response.json() if analytics_response.status_code == 200 else {}
-        except:
-            analytics_data = {}
+    
+    # Get stats directly from database
+    try:
+        # Users count
+        users_result = db.execute(text("SELECT COUNT(*) as count FROM users")).fetchone()
+        users_stats = {"total_users": users_result[0] if users_result else 0}
+    except Exception as e:
+        print(f"Error fetching users stats: {e}")
+        users_stats = {"total_users": 0}
+    
+    try:
+        # Transactions count
+        transactions_result = db.execute(text("SELECT COUNT(*) as count FROM transactions")).fetchone()
+        transactions_stats = {"total_transactions": transactions_result[0] if transactions_result else 0}
+    except Exception as e:
+        print(f"Error fetching transactions stats: {e}")
+        transactions_stats = {"total_transactions": 0}
+    
+    try:
+        # Quizzes completed count
+        quizzes_result = db.execute(text("SELECT COUNT(*) as count FROM quiz_progress WHERE completed = true")).fetchone()
+        quizzes_stats = {"completed_quizzes": quizzes_result[0] if quizzes_result else 0}
+    except Exception as e:
+        print(f"Error fetching quizzes stats: {e}")
+        quizzes_stats = {"completed_quizzes": 0}
+    
+    try:
+        # Goals completed count
+        goals_result = db.execute(text("SELECT COUNT(*) as count FROM goals WHERE completed = true")).fetchone()
+        goals_stats = {"completed_goals": goals_result[0] if goals_result else 0}
+    except Exception as e:
+        print(f"Error fetching goals stats: {e}")
+        goals_stats = {"completed_goals": 0}
     
     return {
         "users": users_stats,
         "transactions": transactions_stats,
         "quizzes": quizzes_stats,
         "goals": goals_stats,
-        "analytics": analytics_data,
+        "analytics": {},
     }
 
 

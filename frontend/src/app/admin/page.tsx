@@ -276,7 +276,7 @@ export default function AdminPage() {
                   <Users className="text-blue-600 dark:text-blue-400" size={24} />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Total Users</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('admin.totalUsers')}</div>
                   <div className="text-2xl font-bold">
                     {stats?.users?.total_users || 0}
                   </div>
@@ -290,7 +290,7 @@ export default function AdminPage() {
                   <Target className="text-green-600 dark:text-green-400" size={24} />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Completed Goals</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('admin.completedGoals')}</div>
                   <div className="text-2xl font-bold">
                     {stats?.goals?.completed_goals || 0}
                   </div>
@@ -304,7 +304,7 @@ export default function AdminPage() {
                   <Award className="text-purple-600 dark:text-purple-400" size={24} />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Completed Quizzes</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('admin.completedQuizzes')}</div>
                   <div className="text-2xl font-bold">
                     {stats?.quizzes?.completed_quizzes || 0}
                   </div>
@@ -318,7 +318,7 @@ export default function AdminPage() {
                   <TrendingUp className="text-orange-600 dark:text-orange-400" size={24} />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Total Transactions</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('admin.totalTransactions')}</div>
                   <div className="text-2xl font-bold">
                     {stats?.transactions?.total_transactions || 0}
                   </div>
@@ -332,12 +332,12 @@ export default function AdminPage() {
             <Card glow className="mb-8">
               <div className="flex items-center gap-2 mb-6">
                 <AlertTriangle className="text-orange-500" size={24} />
-                <h2 className="text-2xl font-bold">Error Analytics</h2>
+                <h2 className="text-2xl font-bold">{t('admin.errorAnalytics')}</h2>
               </div>
               <div className="space-y-4">
                 {errorAnalytics.errors_by_category && (
                   <div>
-                    <h3 className="font-semibold mb-2">Errors by Category</h3>
+                    <h3 className="font-semibold mb-2">{t('admin.errorsByCategory')}</h3>
                     <div className="space-y-2">
                       {Object.entries(errorAnalytics.errors_by_category).map(([category, count]: [string, any]) => (
                         <div key={category} className="flex justify-between items-center">
@@ -350,7 +350,7 @@ export default function AdminPage() {
                 )}
                 {errorAnalytics.quiz_errors && errorAnalytics.quiz_errors.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2">Quiz Errors</h3>
+                    <h3 className="font-semibold mb-2">{t('admin.quizErrors')}</h3>
                     <div className="space-y-2">
                       {errorAnalytics.quiz_errors.slice(0, 10).map((error: any, idx: number) => (
                         <div key={idx} className="flex justify-between items-center">
@@ -372,7 +372,7 @@ export default function AdminPage() {
             <Card glow>
               <div className="flex items-center gap-2 mb-6">
                 <BarChart3 className="text-primary" size={24} />
-                <h2 className="text-2xl font-bold">Scenario Effectiveness</h2>
+                <h2 className="text-2xl font-bold">{t('admin.scenarioEffectiveness')}</h2>
               </div>
               <div className="space-y-4">
                 {scenarioAnalytics.scenarios.map((scenario: any, idx: number) => (
@@ -384,10 +384,10 @@ export default function AdminPage() {
                       </span>
                     </div>
                     <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span>Attempts: {scenario.total_attempts}</span>
+                      <span>{t('admin.attempts')}: {scenario.total_attempts}</span>
                       {scenario.avg_completion_time_seconds > 0 && (
                         <span>
-                          Avg time: {scenario.avg_completion_time_seconds.toFixed(1)}s
+                          {t('admin.avgTime')}: {scenario.avg_completion_time_seconds.toFixed(1)}с
                         </span>
                       )}
                     </div>
