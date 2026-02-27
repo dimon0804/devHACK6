@@ -187,13 +187,23 @@ export default function DashboardPage() {
         console.error('Failed to fetch quest progress', err)
       }
 
+      // Загружаем прогресс квизов для Financial IQ
+      let loadedQuizProgress: any[] = []
+      try {
+        const quizzesResponse = await api.get('/api/v1/quizzes/progress')
+        loadedQuizProgress = quizzesResponse.data || []
+      } catch (err) {
+        console.error('Failed to fetch quiz progress', err)
+      }
+
       // Рассчитываем финансовый рейтинг с использованием загруженных данных
       console.log('=== Financial Rating Calculation ===')
       console.log('Transactions:', recentTransactions.length, recentTransactions)
       console.log('Goals:', loadedGoals.length, loadedGoals)
       console.log('Quest Progress:', loadedQuestProgress.length, loadedQuestProgress)
+      console.log('Quiz Progress:', loadedQuizProgress.length, loadedQuizProgress)
       
-      const rating = calculateFinancialRating(recentTransactions, loadedGoals, loadedQuestProgress)
+      const rating = calculateFinancialRating(recentTransactions, loadedGoals, loadedQuizProgress)
       console.log('Calculated rating:', rating)
       console.log('====================================')
       setFinancialRating(rating || {
@@ -226,7 +236,7 @@ export default function DashboardPage() {
     }
   }
 
-  const calculateFinancialRating = (transactions: any[], goals: any[], questProgress: any[]) => {
+  const calculateFinancialRating = (transactions: any[], goals: any[], quizProgress: any[]) => {
     // 1. Дисциплина (процент накоплений от дохода)
     const incomeTransactions = transactions.filter(t => t.type === 'income')
     const totalIncome = incomeTransactions
@@ -265,40 +275,34 @@ export default function DashboardPage() {
     console.log('  Unique days:', uniqueDays, 'out of 30')
     console.log('  Stability result:', stability, '%')
 
-    // 3. Склонность к риску (на основе категорий)
-    const entertainmentCategories = ['развлечения', 'entertainment', 'игры', 'хобби', 'отдых']
-    const expenseTransactions = transactions.filter(t => t.type === 'expense')
+    // 3. Склонность к риску (на основе транзакций - если есть расходы на развлечения или импульсивные покупки)
+    // Риск = процент расходов от дохода (чем больше тратишь, тем выше риск)
+    const expenseTransactions = transactions.filter(t => t.type === 'expense' || t.type === 'savings_deposit')
     const totalExpenses = expenseTransactions
       .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
     
-    const entertainmentExpenses = expenseTransactions
-      .filter(t => {
-        const desc = (t.description || '').toLowerCase()
-        const matches = entertainmentCategories.some(cat => desc.includes(cat))
-        if (matches) console.log('  Entertainment expense found:', desc, t.amount)
-        return matches
-      })
-      .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
-    
-    const riskTendency = totalExpenses > 0 
-      ? (entertainmentExpenses / totalExpenses) * 100
-      : 0
+    // Риск = отношение расходов к доходам (если тратишь больше 80% дохода - высокий риск)
+    const riskTendency = totalIncome > 0 
+      ? Math.min(100, (totalExpenses / totalIncome) * 100)
+      : totalExpenses > 0 ? 100 : 0
     
     console.log('Risk calculation:')
-    console.log('  Total expenses:', totalExpenses, expenseTransactions)
-    console.log('  Entertainment expenses:', entertainmentExpenses)
+    console.log('  Total income:', totalIncome)
+    console.log('  Total expenses:', totalExpenses, expenseTransactions.length)
     console.log('  Risk result:', riskTendency, '%')
 
-    // 4. Финансовый IQ (на основе квестов)
-    const completedQuests = questProgress.filter(q => q.completed).length
-    const totalQuests = questProgress.length
-    const financialIQ = totalQuests > 0 
-      ? (completedQuests / totalQuests) * 100
-      : 0
+    // 4. Финансовый IQ (на основе квизов)
+    const completedQuizzes = quizProgress.filter((q: any) => q.completed).length
+    const totalQuizzes = quizProgress.length
+    // Если нет квизов, используем уровень пользователя как базовый IQ
+    const financialIQ = totalQuizzes > 0 
+      ? (completedQuizzes / totalQuizzes) * 100
+      : userData ? Math.min(100, (userData.level * 10)) : 0
     
     console.log('Financial IQ calculation:')
-    console.log('  Quest progress:', questProgress)
-    console.log('  Completed:', completedQuests, 'Total:', totalQuests)
+    console.log('  Quiz progress:', quizProgress)
+    console.log('  Completed:', completedQuizzes, 'Total:', totalQuizzes)
+    console.log('  User level:', userData?.level)
     console.log('  Financial IQ result:', financialIQ, '%')
 
     // Определяем профиль
@@ -426,22 +430,45 @@ export default function DashboardPage() {
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + Math.abs(toNumber(t.amount, 0)), 0)
 
-    // Streak (дни активности подряд)
+    // Streak (дни активности подряд) и визуализация активности
     const activityDates = new Set(
       last30Days.map(t => {
         const date = new Date(t.created_at)
-        return date.toDateString()
+        date.setHours(0, 0, 0, 0)
+        return date.toISOString().split('T')[0] // YYYY-MM-DD format
       })
     )
+    
+    // Создаем массив дней активности за последние 30 дней для визуализации
+    const activityDaysData: any[] = []
+    for (let i = 29; i >= 0; i--) {
+      const checkDate = new Date(thirtyDaysAgo)
+      checkDate.setDate(checkDate.getDate() + i)
+      checkDate.setHours(0, 0, 0, 0)
+      const dateStr = checkDate.toISOString().split('T')[0]
+      activityDaysData.push({
+        date: checkDate.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }),
+        active: activityDates.has(dateStr),
+        count: last30Days.filter(t => {
+          const txDate = new Date(t.created_at)
+          txDate.setHours(0, 0, 0, 0)
+          return txDate.toISOString().split('T')[0] === dateStr
+        }).length
+      })
+    }
     
     let streak = 0
     const today = new Date()
     today.setHours(0, 0, 0, 0)
+    const todayStr = today.toISOString().split('T')[0]
     
+    // Считаем streak от сегодня назад
     for (let i = 0; i < 30; i++) {
       const checkDate = new Date(today)
       checkDate.setDate(checkDate.getDate() - i)
-      if (activityDates.has(checkDate.toDateString())) {
+      checkDate.setHours(0, 0, 0, 0)
+      const dateStr = checkDate.toISOString().split('T')[0]
+      if (activityDates.has(dateStr)) {
         streak++
       } else {
         break
@@ -450,6 +477,7 @@ export default function DashboardPage() {
 
     return {
       balanceHistory,
+      activityDaysData,
       savingsGrowth: Math.round(savingsGrowth),
       currentSavings,
       income30Days,
