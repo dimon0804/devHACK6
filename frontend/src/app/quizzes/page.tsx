@@ -90,7 +90,7 @@ export default function QuizzesPage() {
               className="mb-6"
             >
               <ArrowLeft size={18} className="mr-2" />
-              {t('common.backToDashboard')}
+              {t('common.back')}
             </Button>
 
             <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary-400 bg-clip-text text-transparent">
