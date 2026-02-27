@@ -31,7 +31,7 @@ export default function DemoPage() {
     try {
       // Create demo user
       const timestamp = Date.now()
-      const demoEmail = `demo_${timestamp}@finteen.test`
+      const demoEmail = `demo_${timestamp}@example.com`
       const demoPassword = 'demo123456'
       const demoUsername = `DemoUser_${timestamp}`
       
