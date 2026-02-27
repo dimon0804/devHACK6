@@ -265,19 +265,34 @@ export default function DashboardPage() {
     console.log('  Total savings from goals:', totalSavings)
     console.log('  Savings deposits:', savingsDeposits, savingsDepositTransactions)
     
-    const discipline = totalIncome > 0 
-      ? Math.min(100, ((totalSavings + savingsDeposits) / totalIncome) * 100)
+    // Дисциплина считаем только по фактическим взносам (savings_deposit),
+    // чтобы не завышать метрику за счет уже накопленной суммы
+    const disciplineRaw = totalIncome > 0 
+      ? (savingsDeposits / totalIncome) * 100
       : 0
+    const discipline = Math.min(100, Math.max(0, disciplineRaw))
     
     console.log('  Discipline result:', discipline, '%')
 
     // 2. Стабильность (регулярность транзакций)
     const transactionDates = transactions.map(t => {
       const date = new Date(t.created_at)
-      return date.toDateString()
+      date.setHours(0, 0, 0, 0)
+      return date.getTime()
     })
     const uniqueDays = new Set(transactionDates).size
-    const stability = Math.min(100, (uniqueDays / 30) * 100)
+
+    let activeWindowDays = 0
+    if (transactionDates.length > 0) {
+      const minTime = Math.min(...transactionDates)
+      const maxTime = Math.max(...transactionDates)
+      const ONE_DAY = 1000 * 60 * 60 * 24
+      activeWindowDays = Math.round((maxTime - minTime) / ONE_DAY) + 1
+    }
+    // Окно активности не больше 30 дней и не меньше 1 дня
+    const normalizedWindow = Math.max(1, Math.min(30, activeWindowDays || 1))
+    const stabilityRaw = (uniqueDays / normalizedWindow) * 100
+    const stability = Math.min(100, Math.max(0, stabilityRaw))
     
     console.log('Stability calculation:')
     console.log('  Unique days:', uniqueDays, 'out of 30')
@@ -1026,17 +1041,17 @@ export default function DashboardPage() {
 
           {/* Stats Grid */}
           <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card>
+          <Card>
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('common.balance')}</div>
               <div className="text-3xl font-bold">
                 <AnimatedCounter value={userData.balance} prefix={t('common.rubles')} />
               </div>
-            </Card>
-            <Card>
+          </Card>
+          <Card>
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('common.level')}</div>
               <div className="text-3xl font-bold text-primary">{userData.level}</div>
-            </Card>
-            <Card>
+          </Card>
+          <Card>
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('common.xp')}</div>
               <div className="text-3xl font-bold">{xp}</div>
               <ProgressBar value={xpInLevel} max={100} className="mt-3" />
@@ -1130,9 +1145,9 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Подряд активен
-                    </p>
-                  </Card>
-                </div>
+            </p>
+          </Card>
+        </div>
 
                 {/* Сравнение с прошлым периодом */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -1321,7 +1336,7 @@ export default function DashboardPage() {
             >
               Отмена
             </Button>
-          </div>
+        </div>
         </form>
       </Modal>
 

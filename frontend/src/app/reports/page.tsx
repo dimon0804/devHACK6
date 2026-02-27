@@ -22,7 +22,8 @@ export default function ReportsPage() {
       try {
         const [userRes, txRes, goalsRes] = await Promise.all([
           api.get('/api/v1/users/me'),
-          api.get('/api/v1/transactions', { params: { page: 1, page_size: 200 } }),
+          // progress-service ограничивает page_size до 100
+          api.get('/api/v1/transactions', { params: { page: 1, page_size: 100 } }),
           api.get('/api/v1/savings/goals'),
         ])
         setUsername(userRes.data?.username || 'Пользователь')

@@ -71,9 +71,11 @@ export default function ParentModePage() {
     const totalGoals = goals.length
     const goalsProgress = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0
     const quizDone = quizProgress.filter((q) => q.completed).length
-
-    const disciplineScore = income > 0 ? Math.min(100, Math.round((1 - expenses / income) * 100)) : 0
-    const riskScore = income > 0 ? Math.min(100, Math.round((expenses / income) * 100)) : 0
+ 
+    const disciplineRaw = income > 0 ? (1 - expenses / income) * 100 : 0
+    const riskRaw = income > 0 ? (expenses / income) * 100 : 0
+    const disciplineScore = Math.min(100, Math.max(0, Math.round(disciplineRaw)))
+    const riskScore = Math.min(100, Math.max(0, Math.round(riskRaw)))
 
     return { income, expenses, completedGoals, totalGoals, goalsProgress, quizDone, disciplineScore, riskScore }
   }, [transactions, goals, quizProgress])

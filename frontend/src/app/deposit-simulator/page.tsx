@@ -81,12 +81,14 @@ export default function DepositSimulatorPage() {
                   <button
                     key={key}
                     onClick={() => setPlan(key)}
-                    className={`rounded-xl p-3 text-left border transition ${
+                    className={`rounded-xl px-3 py-2 text-left border transition break-words ${
                       plan === key ? 'border-primary bg-primary/10' : 'border-gray-200 dark:border-gray-700'
                     }`}
                   >
-                    <div className="font-semibold text-sm">{plans[key].title}</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">{plans[key].rate}% годовых</div>
+                    <div className="font-semibold text-xs sm:text-sm leading-snug">{plans[key].title}</div>
+                    <div className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400">
+                      {plans[key].rate}% годовых
+                    </div>
                   </button>
                 ))}
               </div>
