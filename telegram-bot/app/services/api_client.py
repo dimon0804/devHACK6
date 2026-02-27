@@ -12,10 +12,21 @@ from app.services.database import AsyncSessionLocal
 class APIClient:
     """
     Клиент для работы с API Gateway FinTeen.
+    
+    Поддерживает два режима работы:
+    - Локальный: http://api-gateway:8000 (когда бот и API Gateway на одном сервере)
+    - Внешний: https://api.finteen.clv-digital.tech (когда бот на другом сервере)
+    
+    Режим определяется через переменную окружения API_GATEWAY_URL.
     """
 
     def __init__(self, base_url: Optional[str] = None, access_token: Optional[str] = None):
-        self.base_url = base_url or os.getenv("API_GATEWAY_URL", "http://api-gateway:8000")
+        # Определяем URL API Gateway:
+        # 1. Если передан явно - используем его
+        # 2. Если задана переменная окружения - используем её
+        # 3. По умолчанию - внешний API Gateway (для продакшн)
+        default_url = os.getenv("API_GATEWAY_URL", "https://api.finteen.clv-digital.tech")
+        self.base_url = base_url or default_url
         self.access_token = access_token
 
     def _get_headers(self) -> Dict[str, str]:
