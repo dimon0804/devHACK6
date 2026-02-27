@@ -54,16 +54,22 @@ export default function AdminPage() {
     setError('')
 
     try {
+      // Clean the password - remove all whitespace and ensure it's a string
+      const cleanPassword = String(password).trim().replace(/\s+/g, '')
+      
+      console.log('[ADMIN] Attempting login with password length:', cleanPassword.length)
+      console.log('[ADMIN] Password value:', JSON.stringify(cleanPassword))
+      
       // Test the token by making a request
       const testRes = await api.get('/api/v1/admin/dashboard', {
-        headers: { Authorization: `Bearer ${password.trim()}` },
+        headers: { Authorization: `Bearer ${cleanPassword}` },
       })
 
       // If successful, save token
-      localStorage.setItem('admin_token', password.trim())
-      setAdminToken(password.trim())
+      localStorage.setItem('admin_token', cleanPassword)
+      setAdminToken(cleanPassword)
       setPassword('')
-      await fetchDashboardData(password.trim())
+      await fetchDashboardData(cleanPassword)
     } catch (err: any) {
       console.error('Failed to authenticate', err)
       if (err.response?.status === 401 || err.response?.status === 403) {
@@ -90,15 +96,18 @@ export default function AdminPage() {
     setLoading(true)
     setError('')
     try {
+      // Ensure token is clean
+      const cleanToken = String(token).trim().replace(/\s+/g, '')
+      
       const [dashboardRes, errorsRes, scenariosRes] = await Promise.all([
         api.get('/api/v1/admin/dashboard', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${cleanToken}` },
         }),
         api.get('/api/v1/admin/analytics/errors', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${cleanToken}` },
         }),
         api.get('/api/v1/admin/analytics/scenarios', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${cleanToken}` },
         }),
       ])
       setStats(dashboardRes.data)
