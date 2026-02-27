@@ -175,6 +175,7 @@ services:
         condition: service_healthy
       user-service:
         condition: service_healthy
+    entrypoint: ["/bin/bash", "/app/entrypoint.sh"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/').read()"]
       interval: 30s
