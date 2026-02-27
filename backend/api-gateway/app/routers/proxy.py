@@ -65,6 +65,15 @@ async def _proxy_request(service: str, path: str, request: Request):
     headers = dict(request.headers)
     headers.pop("host", None)
     headers.pop("content-length", None)
+    
+    # Ensure Authorization header is preserved
+    if "authorization" in headers:
+        # Keep the original case for Authorization header
+        auth_header = headers.get("authorization") or headers.get("Authorization")
+        if auth_header:
+            headers["Authorization"] = auth_header
+            # Remove lowercase version if exists
+            headers.pop("authorization", None)
 
     body = await request.body()
 
