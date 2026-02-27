@@ -91,6 +91,49 @@ class QuizService:
 
         db.commit()
 
+        # Send analytics event
+        try:
+            async with httpx.AsyncClient() as client:
+                # Track quiz completion/error
+                wrong_answers = []
+                for answer in submission.answers:
+                    question = questions.get(answer.question_id)
+                    if question and answer.answer != question.correct_answer:
+                        wrong_answers.append({
+                            "quiz_id": quiz_id,
+                            "question_id": answer.question_id
+                        })
+                
+                if wrong_answers:
+                    # Track errors
+                    for error in wrong_answers:
+                        await client.post(
+                            f"{settings.ANALYTICS_SERVICE_URL}/api/v1/analytics/events",
+                            json={
+                                "event_type": "quiz_error",
+                                "event_category": "quiz",
+                                "metadata": error
+                            },
+                            timeout=2.0
+                        )
+                
+                # Track completion
+                await client.post(
+                    f"{settings.ANALYTICS_SERVICE_URL}/api/v1/analytics/events",
+                    json={
+                        "event_type": "quiz_completed" if completed else "quiz_attempted",
+                        "event_category": "quiz",
+                        "metadata": {
+                            "quiz_id": quiz_id,
+                            "score": score,
+                            "completed": completed
+                        }
+                    },
+                    timeout=2.0
+                )
+        except Exception:
+            pass  # Don't fail if analytics fails
+
         # Award XP if completed
         xp_earned = 0
         if completed:

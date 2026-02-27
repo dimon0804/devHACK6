@@ -178,8 +178,43 @@ class SavingsService:
                         )
                     except Exception:
                         pass
+                    
+                    # Send analytics event for goal completion
+                    try:
+                        await client.post(
+                            f"{settings.ANALYTICS_SERVICE_URL}/api/v1/analytics/events",
+                            json={
+                                "event_type": "scenario_success",
+                                "event_category": "savings",
+                                "metadata": {
+                                    "goal_completed": True,
+                                    "target_amount": float(goal.target_amount)
+                                }
+                            },
+                            timeout=2.0
+                        )
+                    except Exception:
+                        pass  # Don't fail if analytics fails
             except httpx.RequestError:
                 pass
+        else:
+            # Send analytics event for deposit (goal not completed yet)
+            try:
+                async with httpx.AsyncClient() as client:
+                    await client.post(
+                        f"{settings.ANALYTICS_SERVICE_URL}/api/v1/analytics/events",
+                        json={
+                            "event_type": "scenario_success",
+                            "event_category": "savings",
+                            "metadata": {
+                                "deposit_amount": float(deposit_data.amount),
+                                "progress_percent": float((goal.current_amount / goal.target_amount * 100) if goal.target_amount > 0 else 0)
+                            }
+                        },
+                        timeout=2.0
+                    )
+            except Exception:
+                pass  # Don't fail if analytics fails
 
         db.commit()
         db.refresh(goal)

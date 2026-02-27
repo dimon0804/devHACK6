@@ -101,6 +101,23 @@ class BudgetService:
                     except Exception:
                         pass  # Don't fail if achievement check fails
                     
+                    # Send analytics event
+                    try:
+                        await client.post(
+                            f"{settings.ANALYTICS_SERVICE_URL}/api/v1/analytics/events",
+                            json={
+                                "event_type": "scenario_success" if success else "scenario_failure",
+                                "event_category": "budget",
+                                "metadata": {
+                                    "categories_count": len(request.categories),
+                                    "difference_percent": float((difference / request.income * 100) if request.income > 0 else 0)
+                                }
+                            },
+                            timeout=2.0
+                        )
+                    except Exception:
+                        pass  # Don't fail if analytics fails
+                    
                     # Создаем транзакции-планы для каждой категории
                     for category in request.categories:
                         category_transaction = {

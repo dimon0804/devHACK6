@@ -248,5 +248,28 @@
     "riskLow": "Low",
     "riskMedium": "Medium",
     "riskHigh": "High"
+  },
+  "antifraud": {
+    "title": "Anti-scam Education",
+    "subtitle": "Protection against financial fraud",
+    "phishing": "Phishing Protection",
+    "investment": "100% Guaranteed Investments",
+    "crypto": "Cryptocurrency Scams",
+    "comprehensive": "Anti-scam: Fraud Recognition"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "subtitle": "Analytics and Metrics",
+    "totalUsers": "Total Users",
+    "completedGoals": "Completed Goals",
+    "completedQuizzes": "Completed Quizzes",
+    "totalTransactions": "Total Transactions",
+    "errorAnalytics": "Error Analytics",
+    "scenarioEffectiveness": "Scenario Effectiveness",
+    "errorsByCategory": "Errors by Category",
+    "quizErrors": "Quiz Errors",
+    "attempts": "Attempts",
+    "avgTime": "Avg Time",
+    "refresh": "Refresh"
   }
 }

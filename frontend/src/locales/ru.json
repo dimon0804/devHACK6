@@ -326,5 +326,28 @@
     "riskLow": "Низкий",
     "riskMedium": "Средний",
     "riskHigh": "Повышенный"
+  },
+  "antifraud": {
+    "title": "Антискам обучение",
+    "subtitle": "Защита от финансовых мошенничеств",
+    "phishing": "Защита от фишинга",
+    "investment": "Инвестиции с гарантией 100%",
+    "crypto": "Криптовалютные мошенничества",
+    "comprehensive": "Антискам: распознавание мошенничества"
+  },
+  "admin": {
+    "title": "Админ панель",
+    "subtitle": "Аналитика и метрики",
+    "totalUsers": "Всего пользователей",
+    "completedGoals": "Завершенных целей",
+    "completedQuizzes": "Пройденных квизов",
+    "totalTransactions": "Всего транзакций",
+    "errorAnalytics": "Аналитика ошибок",
+    "scenarioEffectiveness": "Эффективность сценариев",
+    "errorsByCategory": "Ошибки по категориям",
+    "quizErrors": "Ошибки в квизах",
+    "attempts": "Попыток",
+    "avgTime": "Среднее время",
+    "refresh": "Обновить"
   }
 }

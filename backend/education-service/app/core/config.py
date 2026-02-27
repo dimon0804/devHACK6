@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     REDIS_URL: str = "redis://localhost:6379"
     USER_SERVICE_URL: str = "http://user-service:8000"
+    ANALYTICS_SERVICE_URL: str = "http://analytics-service:8000"
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
     ENVIRONMENT: str = "development"
 
