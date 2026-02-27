@@ -15,6 +15,10 @@ import {
   Target,
   Award,
   RefreshCw,
+  Lock,
+  Eye,
+  EyeOff,
+  LogOut,
 } from 'lucide-react'
 
 export default function AdminPage() {
@@ -24,18 +28,67 @@ export default function AdminPage() {
   const [errorAnalytics, setErrorAnalytics] = useState<any>(null)
   const [scenarioAnalytics, setScenarioAnalytics] = useState<any>(null)
   const [adminToken, setAdminToken] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false)
 
   useEffect(() => {
-    // Get admin token from localStorage or prompt
+    // Get admin token from localStorage
     const token = localStorage.getItem('admin_token') || ''
     setAdminToken(token)
     if (token) {
       fetchDashboardData(token)
+    } else {
+      setLoading(false)
     }
   }, [])
 
+  const handleLogin = async () => {
+    if (!password.trim()) {
+      setError('Пожалуйста, введите пароль')
+      return
+    }
+
+    setIsAuthenticating(true)
+    setError('')
+
+    try {
+      // Test the token by making a request
+      const testRes = await api.get('/api/v1/admin/dashboard', {
+        headers: { Authorization: `Bearer ${password.trim()}` },
+      })
+
+      // If successful, save token
+      localStorage.setItem('admin_token', password.trim())
+      setAdminToken(password.trim())
+      setPassword('')
+      await fetchDashboardData(password.trim())
+    } catch (err: any) {
+      console.error('Failed to authenticate', err)
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError('Неверный пароль. Попробуйте снова.')
+      } else {
+        setError('Ошибка подключения. Попробуйте позже.')
+      }
+    } finally {
+      setIsAuthenticating(false)
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token')
+    setAdminToken('')
+    setStats(null)
+    setErrorAnalytics(null)
+    setScenarioAnalytics(null)
+    setPassword('')
+    setError('')
+  }
+
   const fetchDashboardData = async (token: string) => {
     setLoading(true)
+    setError('')
     try {
       const [dashboardRes, errorsRes, scenariosRes] = await Promise.all([
         api.get('/api/v1/admin/dashboard', {
@@ -54,12 +107,12 @@ export default function AdminPage() {
     } catch (err: any) {
       console.error('Failed to fetch admin data', err)
       if (err.response?.status === 401 || err.response?.status === 403) {
-        const newToken = prompt('Введите admin token:')
-        if (newToken) {
-          localStorage.setItem('admin_token', newToken)
-          setAdminToken(newToken)
-          fetchDashboardData(newToken)
-        }
+        // Token expired or invalid, clear it
+        localStorage.removeItem('admin_token')
+        setAdminToken('')
+        setError('Сессия истекла. Пожалуйста, войдите снова.')
+      } else {
+        setError('Ошибка загрузки данных. Попробуйте обновить страницу.')
       }
     } finally {
       setLoading(false)
@@ -68,25 +121,86 @@ export default function AdminPage() {
 
   if (!adminToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-8">
-          <h2 className="text-2xl font-bold mb-4">Admin Access</h2>
-          <input
-            type="password"
-            placeholder="Enter admin token"
-            className="w-full px-4 py-2 border rounded-lg mb-4"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const token = (e.target as HTMLInputElement).value
-                if (token) {
-                  localStorage.setItem('admin_token', token)
-                  setAdminToken(token)
-                  fetchDashboardData(token)
-                }
-              }
-            }}
-          />
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="p-8 w-full max-w-md">
+            <div className="flex items-center justify-center mb-6">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Lock className="text-primary" size={32} />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-center mb-2">Админ-панель</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+              Введите пароль для доступа
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 text-center mb-4">
+              Пароль по умолчанию: admin-secret-key-change-in-production
+            </p>
+
+            <div className="space-y-4">
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Пароль администратора"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setError('')
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isAuthenticating) {
+                      handleLogin()
+                    }
+                  }}
+                  className="w-full px-4 py-3 pl-12 pr-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  disabled={isAuthenticating}
+                />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm"
+                >
+                  {error}
+                </motion.div>
+              )}
+
+              <Button
+                variant="primary"
+                className="w-full"
+                onClick={handleLogin}
+                disabled={isAuthenticating || !password.trim()}
+              >
+                {isAuthenticating ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                    />
+                    Проверка...
+                  </>
+                ) : (
+                  'Войти'
+                )}
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
       </div>
     )
   }
@@ -109,20 +223,41 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">Admin Dashboard</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">Админ-панель</h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Comprehensive analytics and metrics
+                Аналитика и метрики платформы
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => fetchDashboardData(adminToken)}
-            >
-              <RefreshCw size={18} className="mr-2" />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fetchDashboardData(adminToken)}
+                disabled={loading}
+              >
+                <RefreshCw size={18} className="mr-2" />
+                Обновить
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+              >
+                <LogOut size={18} className="mr-2" />
+                Выйти
+              </Button>
+            </div>
           </div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400"
+            >
+              {error}
+            </motion.div>
+          )}
 
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
