@@ -129,6 +129,7 @@ export default function DashboardPage() {
     if (userData) {
       fetchFinancialData()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData])
 
   const fetchFinancialData = async () => {

@@ -116,7 +116,7 @@ export default function AchievementsPage() {
                                 Получено
                               </Badge>
                             ) : (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="default" className="text-xs">
                                 <Lock size={12} className="mr-1" />
                                 Заблокировано
                               </Badge>
