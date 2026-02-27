@@ -19,6 +19,7 @@ import { Moon, Sun, Globe, TrendingUp, Target, History, Trophy, BarChart3, Flame
 import { formatBalanceNumber, toNumber } from '@/lib/utils'
 import { useToastStore } from '@/store/toastStore'
 import { Onboarding } from '@/components/onboarding/Onboarding'
+import { Tooltip as UiTooltip } from '@/components/ui/Tooltip'
 import {
   LineChart,
   Line,
@@ -826,9 +827,13 @@ export default function DashboardPage() {
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                     {t('budget.startPlanning')}
                   </p>
-                  <Button variant="primary" size="sm" className="group-hover:scale-105 transition-transform">
-                    {t('common.startPlanning')}
-                  </Button>
+                  <UiTooltip content="Сначала создай план, потом уже трать">
+                    <div>
+                      <Button variant="primary" size="sm" className="group-hover:scale-105 transition-transform">
+                        {t('common.startPlanning')}
+                      </Button>
+                    </div>
+                  </UiTooltip>
                 </div>
               </div>
             </Card>
@@ -845,9 +850,13 @@ export default function DashboardPage() {
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                     {t('savings.manageGoals')}
                   </p>
-                  <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
-                    {t('common.manageGoals')}
-                  </Button>
+                  <UiTooltip content="Цели помогают быстрее растить уровень и XP">
+                    <div>
+                      <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
+                        {t('common.manageGoals')}
+                      </Button>
+                    </div>
+                  </UiTooltip>
                 </div>
               </div>
             </Card>
@@ -864,9 +873,13 @@ export default function DashboardPage() {
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                     {t('quizzes.subtitle')}
                   </p>
-                  <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
-                    {t('quizzes.startQuiz')}
-                  </Button>
+                  <UiTooltip content="Квизы сильнее всего поднимают финансовый IQ">
+                    <div>
+                      <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
+                        {t('quizzes.startQuiz')}
+                      </Button>
+                    </div>
+                  </UiTooltip>
                 </div>
               </div>
             </Card>
@@ -888,6 +901,47 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               </div>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card hover onClick={() => router.push('/parent')} className="group cursor-pointer">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-blue-500/10 rounded-xl">
+                  <Shield className="text-blue-600 dark:text-blue-400" size={22} />
+                </div>
+                <h3 className="text-lg font-bold">Родительский режим</h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                Прогресс ребенка, риски и рекомендации в одном месте
+              </p>
+              <Button variant="secondary" size="sm">Открыть</Button>
+            </Card>
+
+            <Card hover onClick={() => router.push('/reports')} className="group cursor-pointer">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <BarChart3 className="text-primary" size={22} />
+                </div>
+                <h3 className="text-lg font-bold">Отчет PDF</h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                Экспортируй финансовый отчет для родителя или ментора
+              </p>
+              <Button variant="primary" size="sm">Скачать</Button>
+            </Card>
+
+            <Card hover onClick={() => router.push('/deposit-simulator')} className="group cursor-pointer">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-green-500/10 rounded-xl">
+                  <TrendingUp className="text-green-600 dark:text-green-400" size={22} />
+                </div>
+                <h3 className="text-lg font-bold">Симулятор вклада</h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                Сравни ставки и риск-профили как в реальном банке
+              </p>
+              <Button variant="secondary" size="sm">Смоделировать</Button>
             </Card>
           </motion.div>
 

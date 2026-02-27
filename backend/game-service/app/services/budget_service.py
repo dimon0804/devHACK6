@@ -1,4 +1,5 @@
 import httpx
+import logging
 from decimal import Decimal
 from app.core.config import settings
 from app.schemas.budget import BudgetPlanRequest, BudgetCategory
@@ -8,6 +9,7 @@ class BudgetService:
     BALANCED_THRESHOLD = Decimal("0.10")
     XP_REWARD_BALANCED = 50
     XP_REWARD_UNBALANCED = 10
+    logger = logging.getLogger(__name__)
 
     @staticmethod
     async def process_budget_plan(
@@ -112,10 +114,10 @@ class BudgetService:
                             json=category_transaction,
                             timeout=5.0
                         )
-                except Exception as tx_error:
-                    print(f"Error creating plan transactions: {tx_error}", exc_info=True)
+                except Exception:
+                    BudgetService.logger.exception("Error creating plan transactions")
             except httpx.RequestError as e:
-                print(f"Error updating XP: {e}")
+                BudgetService.logger.warning(f"Error updating XP: {e}")
 
         return {
             "success": success,

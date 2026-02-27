@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -9,10 +10,21 @@ from app.routers import user, health
 from app.services.event_listener import event_listener
 
 # Configure structured logging
+correlation_id_ctx: ContextVar[str] = ContextVar("correlation_id", default="-")
+
+
+class CorrelationIdFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.correlation_id = correlation_id_ctx.get()
+        return True
+
+
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - [%(correlation_id)s] - %(message)s'
 )
+for handler in logging.getLogger().handlers:
+    handler.addFilter(CorrelationIdFilter())
 logger = logging.getLogger(__name__)
 
 
@@ -56,20 +68,14 @@ app.add_middleware(
 async def add_correlation_id(request: Request, call_next):
     correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
     request.state.correlation_id = correlation_id
-    
-    # Add correlation ID to logger context
-    old_factory = logging.getLogRecordFactory()
-    
-    def record_factory(*args, **kwargs):
-        record = old_factory(*args, **kwargs)
-        record.correlation_id = correlation_id
-        return record
-    
-    logging.setLogRecordFactory(record_factory)
-    
-    response = await call_next(request)
-    response.headers["X-Correlation-ID"] = correlation_id
-    return response
+
+    token = correlation_id_ctx.set(correlation_id)
+    try:
+        response = await call_next(request)
+        response.headers["X-Correlation-ID"] = correlation_id
+        return response
+    finally:
+        correlation_id_ctx.reset(token)
 
 
 app.include_router(health.router, prefix="/health", tags=["health"])

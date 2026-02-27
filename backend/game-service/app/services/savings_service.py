@@ -106,8 +106,8 @@ class SavingsService:
                     print(f"Transaction response: {transaction_response.status_code}, {transaction_response.text}")
                     if transaction_response.status_code != 201:
                         print(f"Failed to create transaction: {transaction_response.status_code}, {transaction_response.text}")
-                except Exception as tx_error:
-                    print(f"Error creating transaction: {tx_error}", exc_info=True)
+                except Exception:
+                    logger.exception("Error creating transaction")
                     # Don't fail the deposit if transaction creation fails
             except httpx.RequestError as e:
                 raise HTTPException(
@@ -122,8 +122,14 @@ class SavingsService:
             goal.current_amount = goal.target_amount
 
             try:
+                from app.core.events import event_publisher
+                await event_publisher.publish(
+                    "goal_completed",
+                    user_id,
+                    {"xp_reward": SavingsService.XP_REWARD_GOAL_COMPLETED, "goal_id": goal.id}
+                )
                 async with httpx.AsyncClient() as client:
-                    xp_response = await client.post(
+                    await client.post(
                         f"{settings.USER_SERVICE_URL}/api/v1/users/xp",
                         headers={"Authorization": f"Bearer {token}"},
                         json={"xp": SavingsService.XP_REWARD_GOAL_COMPLETED},
@@ -218,8 +224,14 @@ class SavingsService:
             goal.current_amount = goal.target_amount
 
             try:
+                from app.core.events import event_publisher
+                await event_publisher.publish(
+                    "goal_completed",
+                    user_id,
+                    {"xp_reward": SavingsService.XP_REWARD_GOAL_COMPLETED, "goal_id": goal.id}
+                )
                 async with httpx.AsyncClient() as client:
-                    xp_response = await client.post(
+                    await client.post(
                         f"{settings.USER_SERVICE_URL}/api/v1/users/xp",
                         headers={"Authorization": f"Bearer {token}"},
                         json={"xp": SavingsService.XP_REWARD_GOAL_COMPLETED},
