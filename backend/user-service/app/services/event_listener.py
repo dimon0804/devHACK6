@@ -1,7 +1,10 @@
 import asyncio
 import json
 import logging
-import redis.asyncio as redis
+try:
+    import redis.asyncio as redis
+except ImportError:
+    import aioredis as redis
 from typing import Optional
 from app.core.config import settings
 from app.core.database import SessionLocal

@@ -309,6 +309,15 @@ export default function Home() {
                   >
                     Войти
                   </Button>
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={() => router.push('/demo')}
+                    className="border-2 border-primary/30 hover:border-primary/50"
+                  >
+                    <Sparkles size={18} className="mr-2" />
+                    Демо-режим
+                  </Button>
                 </div>
               </Card>
             </motion.div>
