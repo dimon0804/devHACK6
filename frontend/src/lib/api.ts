@@ -14,8 +14,8 @@ const apiInstance: AxiosInstance = axios.create({
 // Request interceptor to add auth token
 apiInstance.interceptors.request.use(
   (config) => {
-    // Get token from localStorage (since auth store uses it)
-    if (typeof window !== 'undefined') {
+    // Only add token if Authorization header is not already set (for admin panel)
+    if (!config.headers.Authorization && typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token')
       if (token) {
         config.headers.Authorization = `Bearer ${token}`

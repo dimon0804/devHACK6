@@ -138,7 +138,7 @@ export default function AdminPage() {
               Введите пароль для доступа
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-500 text-center mb-4">
-              Пароль по умолчанию: admin-secret-key-change-in-production
+              Пароль по умолчанию: 123456
             </p>
 
             <div className="space-y-4">

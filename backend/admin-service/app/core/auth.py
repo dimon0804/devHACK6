@@ -30,7 +30,8 @@ async def verify_admin_token(authorization: str = Header(None)):
         )
     
     # Simple token check (in production, use JWT or proper auth)
-    logger.debug(f"Token check: received={token[:10]}..., expected={settings.ADMIN_SECRET_KEY[:10]}...")
+    logger.info(f"Token check: received length={len(token)}, expected length={len(settings.ADMIN_SECRET_KEY)}")
+    logger.info(f"Token check: received={repr(token)}, expected={repr(settings.ADMIN_SECRET_KEY)}")
     if token != settings.ADMIN_SECRET_KEY:
         logger.warning(f"Invalid admin token: received token does not match")
         raise HTTPException(
