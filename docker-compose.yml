@@ -294,6 +294,23 @@ services:
       retries: 3
       start_period: 30s
 
+  telegram-bot:
+    build:
+      context: ./telegram-bot
+      dockerfile: Dockerfile
+    container_name: fintech_telegram_bot
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - API_GATEWAY_URL=${API_GATEWAY_URL:-http://api-gateway:8000}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-fintech_user}:${POSTGRES_PASSWORD:-fintech_pass}@postgres:5432/${POSTGRES_DB:-fintech_db}
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - fintech_network
+    depends_on:
+      - postgres
+      - redis
+      - api-gateway
+
 networks:
   fintech_network:
     driver: bridge
