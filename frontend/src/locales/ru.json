@@ -346,8 +346,12 @@
     "scenarioEffectiveness": "Эффективность сценариев",
     "errorsByCategory": "Ошибки по категориям",
     "quizErrors": "Ошибки в квизах",
+    "problematicTopics": "Проблемные темы",
+    "problematicQuestions": "Сложные вопросы",
     "attempts": "Попыток",
     "avgTime": "Среднее время",
-    "refresh": "Обновить"
+    "refresh": "Обновить",
+    "noErrorData": "Данные об ошибках пока отсутствуют",
+    "noScenarioData": "Данные о сценариях пока отсутствуют"
   }
 }

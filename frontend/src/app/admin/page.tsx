@@ -269,7 +269,7 @@ export default function AdminPage() {
           )}
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card glow>
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -280,6 +280,11 @@ export default function AdminPage() {
                   <div className="text-2xl font-bold">
                     {stats?.users?.total_users || 0}
                   </div>
+                  {stats?.users?.active_users_30d > 0 && (
+                    <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      Активных за 30 дней: {stats.users.active_users_30d}
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -294,6 +299,16 @@ export default function AdminPage() {
                   <div className="text-2xl font-bold">
                     {stats?.goals?.completed_goals || 0}
                   </div>
+                  {stats?.goals?.total_goals > 0 && (
+                    <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      Всего целей: {stats.goals.total_goals}
+                    </div>
+                  )}
+                  {stats?.goals?.total_saved > 0 && (
+                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Накоплено: {stats.goals.total_saved.toLocaleString('ru-RU')} ₽
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -308,6 +323,11 @@ export default function AdminPage() {
                   <div className="text-2xl font-bold">
                     {stats?.quizzes?.completed_quizzes || 0}
                   </div>
+                  {stats?.quizzes?.avg_score > 0 && (
+                    <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      Средний балл: {stats.quizzes.avg_score}%
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -322,6 +342,11 @@ export default function AdminPage() {
                   <div className="text-2xl font-bold">
                     {stats?.transactions?.total_transactions || 0}
                   </div>
+                  {stats?.transactions?.total_income > 0 && (
+                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Общий доход: {stats.transactions.total_income.toLocaleString('ru-RU')} ₽
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -334,33 +359,68 @@ export default function AdminPage() {
                 <AlertTriangle className="text-orange-500" size={24} />
                 <h2 className="text-2xl font-bold">{t('admin.errorAnalytics')}</h2>
               </div>
-              <div className="space-y-4">
-                {errorAnalytics.errors_by_category && (
+              <div className="space-y-6">
+                {errorAnalytics.errors_by_category && Object.keys(errorAnalytics.errors_by_category).length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2">{t('admin.errorsByCategory')}</h3>
+                    <h3 className="font-semibold mb-3 text-lg">{t('admin.errorsByCategory')}</h3>
                     <div className="space-y-2">
                       {Object.entries(errorAnalytics.errors_by_category).map(([category, count]: [string, any]) => (
-                        <div key={category} className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400">{category}</span>
-                          <span className="font-bold">{count}</span>
+                        <div key={category} className="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800/30">
+                          <span className="text-gray-700 dark:text-gray-300 capitalize">{category || 'Неизвестная категория'}</span>
+                          <span className="font-bold text-red-600 dark:text-red-400">{count}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+                
                 {errorAnalytics.quiz_errors && errorAnalytics.quiz_errors.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-2">{t('admin.quizErrors')}</h3>
-                    <div className="space-y-2">
-                      {errorAnalytics.quiz_errors.slice(0, 10).map((error: any, idx: number) => (
-                        <div key={idx} className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-gray-400">
-                            Quiz {error.quiz_id} - Q{error.question_id}
-                          </span>
-                          <span className="font-bold">{error.count}</span>
+                    <h3 className="font-semibold mb-3 text-lg">{t('admin.problematicTopics')}</h3>
+                    <div className="space-y-3">
+                      {errorAnalytics.quiz_errors.map((error: any, idx: number) => (
+                        <div key={idx} className="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{error.quiz_title || `Квиз #${idx + 1}`}</span>
+                            <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
+                              {error.error_rate}% ошибок
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Ошибок: {error.error_count} из {error.total_attempts} попыток
+                          </div>
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+                
+                {errorAnalytics.problematic_questions && errorAnalytics.problematic_questions.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-3 text-lg">{t('admin.problematicQuestions')}</h3>
+                    <div className="space-y-2">
+                      {errorAnalytics.problematic_questions.map((item: any, idx: number) => (
+                        <div key={idx} className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                            {item.quiz_title}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {item.question}
+                          </div>
+                          <div className="text-xs text-red-600 dark:text-red-400">
+                            Ошибок: {item.error_count}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {(!errorAnalytics.errors_by_category || Object.keys(errorAnalytics.errors_by_category).length === 0) &&
+                 (!errorAnalytics.quiz_errors || errorAnalytics.quiz_errors.length === 0) &&
+                 (!errorAnalytics.problematic_questions || errorAnalytics.problematic_questions.length === 0) && (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    {t('admin.noErrorData')}
                   </div>
                 )}
               </div>
@@ -375,30 +435,45 @@ export default function AdminPage() {
                 <h2 className="text-2xl font-bold">{t('admin.scenarioEffectiveness')}</h2>
               </div>
               <div className="space-y-4">
-                {scenarioAnalytics.scenarios.map((scenario: any, idx: number) => (
-                  <div key={idx} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold capitalize">{scenario.scenario_type}</span>
-                      <span className="text-primary font-bold">
-                        {scenario.success_rate.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span>{t('admin.attempts')}: {scenario.total_attempts}</span>
-                      {scenario.avg_completion_time_seconds > 0 && (
-                        <span>
-                          {t('admin.avgTime')}: {scenario.avg_completion_time_seconds.toFixed(1)}с
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-2 w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                      <div
-                        className="h-2 bg-primary rounded-full"
-                        style={{ width: `${scenario.success_rate}%` }}
-                      />
-                    </div>
+                {scenarioAnalytics.scenarios.length > 0 ? (
+                  scenarioAnalytics.scenarios.map((scenario: any, idx: number) => {
+                    const scenarioNames: Record<string, string> = {
+                      budget: 'Планирование бюджета',
+                      savings: 'Накопления',
+                      quiz: 'Квизы',
+                      antifraud: 'Антискам'
+                    }
+                    return (
+                      <div key={idx} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-semibold">{scenarioNames[scenario.scenario_type] || scenario.scenario_type}</span>
+                          <span className="text-primary font-bold">
+                            {scenario.success_rate.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          <span>{t('admin.attempts')}: {scenario.total_attempts}</span>
+                          <span>Успешно: {scenario.success_count} | Неудачно: {scenario.failure_count}</span>
+                        </div>
+                        {scenario.avg_completion_time_seconds > 0 && (
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {t('admin.avgTime')}: {scenario.avg_completion_time_seconds.toFixed(1)}с
+                          </div>
+                        )}
+                        <div className="mt-2 w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                          <div
+                            className="h-2 bg-primary rounded-full transition-all"
+                            style={{ width: `${scenario.success_rate}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    {t('admin.noScenarioData')}
                   </div>
-                ))}
+                )}
               </div>
             </Card>
           )}
