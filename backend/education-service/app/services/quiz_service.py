@@ -103,6 +103,37 @@ class QuizService:
                         json={"xp": xp_earned},
                         timeout=5.0
                     )
+                    
+                    # Check for achievements
+                    try:
+                        # Get count of completed quizzes
+                        completed_quizzes = db.query(QuizProgress).filter(
+                            QuizProgress.user_id == user_id,
+                            QuizProgress.completed == True
+                        ).count()
+                        
+                        await client.post(
+                            f"{settings.EDUCATION_SERVICE_URL}/api/v1/achievements/check",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "achievement_type": "quizzes_completed",
+                                "condition": {"completed_count": completed_quizzes}
+                            },
+                            timeout=5.0
+                        )
+                        
+                        # Check daily challenge
+                        await client.post(
+                            f"{settings.EDUCATION_SERVICE_URL}/api/v1/daily-challenges/check",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "challenge_type": "complete_quiz",
+                                "condition_data": {}
+                            },
+                            timeout=5.0
+                        )
+                    except Exception:
+                        pass  # Don't fail if achievement check fails
             except httpx.RequestError:
                 pass  # Log but don't fail
 
