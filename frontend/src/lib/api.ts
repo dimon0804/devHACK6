@@ -1,7 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
-// Get API base URL from environment variable
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// Get API base URL from environment variable (production-safe default)
+// В проде по умолчанию ходим через api.finteen.clv-digital.tech,
+// а локально можно переопределить через NEXT_PUBLIC_API_URL.
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://api.finteen.clv-digital.tech'
 
 // Create axios instance
 const apiInstance: AxiosInstance = axios.create({
