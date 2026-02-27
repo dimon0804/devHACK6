@@ -30,13 +30,20 @@ async def verify_admin_token(authorization: str = Header(None)):
         )
     
     # Simple token check (in production, use JWT or proper auth)
+    # Use print for immediate visibility
+    print(f"[AUTH] Token check: received length={len(token)}, expected length={len(settings.ADMIN_SECRET_KEY)}")
+    print(f"[AUTH] Token check: received={repr(token)}, expected={repr(settings.ADMIN_SECRET_KEY)}")
+    print(f"[AUTH] Token match: {token == settings.ADMIN_SECRET_KEY}")
+    
     logger.info(f"Token check: received length={len(token)}, expected length={len(settings.ADMIN_SECRET_KEY)}")
     logger.info(f"Token check: received={repr(token)}, expected={repr(settings.ADMIN_SECRET_KEY)}")
+    
     if token != settings.ADMIN_SECRET_KEY:
+        print(f"[AUTH] ERROR: Token mismatch!")
         logger.warning(f"Invalid admin token: received token does not match")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid admin token"
+            detail=f"Invalid admin token. Expected length: {len(settings.ADMIN_SECRET_KEY)}, received length: {len(token)}"
         )
     
     return token

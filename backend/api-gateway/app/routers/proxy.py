@@ -66,14 +66,19 @@ async def _proxy_request(service: str, path: str, request: Request):
     headers.pop("host", None)
     headers.pop("content-length", None)
     
-    # Ensure Authorization header is preserved
+    # Ensure Authorization header is preserved with correct case
+    auth_header = None
     if "authorization" in headers:
-        # Keep the original case for Authorization header
-        auth_header = headers.get("authorization") or headers.get("Authorization")
-        if auth_header:
-            headers["Authorization"] = auth_header
-            # Remove lowercase version if exists
-            headers.pop("authorization", None)
+        auth_header = headers.get("authorization")
+        headers.pop("authorization", None)
+    elif "Authorization" in headers:
+        auth_header = headers.get("Authorization")
+    
+    if auth_header:
+        headers["Authorization"] = auth_header
+        # Debug logging for admin requests
+        if service == "admin":
+            print(f"[GATEWAY] Forwarding Authorization header: {auth_header[:50]}...")
 
     body = await request.body()
 
