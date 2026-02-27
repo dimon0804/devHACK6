@@ -197,7 +197,7 @@ export default function SavingsPage() {
             onClick={() => router.push('/dashboard')}
             className="mb-6"
           >
-            {t('common.backToDashboard')}
+            {t('common.back')}
           </Button>
 
           <div className="flex justify-between items-center mb-8">

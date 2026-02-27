@@ -448,7 +448,7 @@ export default function BudgetPage() {
             onClick={() => router.push('/dashboard')}
             className="mb-6"
           >
-            {t('common.backToDashboard')}
+            {t('common.back')}
           </Button>
 
           <Card glow className="mb-6">
