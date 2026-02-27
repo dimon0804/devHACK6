@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Footer } from '@/components/layout/Footer'
-import { ArrowLeft, Trophy, Lock, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Trophy, Lock, CheckCircle, Sparkles } from 'lucide-react'
 
 interface Achievement {
   id: number
