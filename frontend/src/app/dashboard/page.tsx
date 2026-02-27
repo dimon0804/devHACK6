@@ -891,7 +891,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Education Section */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card hover onClick={() => router.push('/guided')} className="group cursor-pointer">
               <div className="flex items-center justify-between">
                 <div>
@@ -925,6 +925,44 @@ export default function DashboardPage() {
                   </p>
                   <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
                     {t('badges.viewBadges')}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            <Card hover onClick={() => router.push('/achievements')} className="group cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-green-500/10 rounded-xl">
+                      <Trophy className="text-green-600 dark:text-green-400" size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold">Достижения</h3>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    Отслеживайте свой прогресс
+                  </p>
+                  <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
+                    Посмотреть
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            <Card hover onClick={() => router.push('/daily-challenge')} className="group cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-orange-500/10 rounded-xl">
+                      <Flame className="text-orange-600 dark:text-orange-400" size={24} />
+                    </div>
+                    <h3 className="text-xl font-bold">Ежедневное задание</h3>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    Выполняйте задания и получайте XP
+                  </p>
+                  <Button variant="secondary" size="sm" className="group-hover:scale-105 transition-transform">
+                    Открыть
                   </Button>
                 </div>
               </div>
