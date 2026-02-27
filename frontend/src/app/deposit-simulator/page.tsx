@@ -104,7 +104,7 @@ export default function DepositSimulatorPage() {
               </div>
 
               <div className="mt-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
+                <p className="text-sm text-gray-700 dark:text-gray-300 break-words leading-relaxed">
                   Этот расчет демонстрационный. В реальном банке итог зависит от капитализации, налогов и условий досрочного снятия.
                 </p>
                 <div className="mt-3 flex gap-2">

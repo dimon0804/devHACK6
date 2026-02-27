@@ -72,7 +72,7 @@ export default function DemoPage() {
 
       // Create budgets
       for (let i = 0; i < 5; i++) {
-        await api.post('/api/v1/game/budget/plan', {
+        await api.post('/api/v1/budget/plan', {
           income: 10000 + i * 1000,
           categories: [
             { name: 'Еда', amount: 3000 + i * 300 },
@@ -84,27 +84,36 @@ export default function DemoPage() {
       }
 
       // Create savings goals
-      await api.post('/api/v1/game/savings/goals', {
-        title: 'Новый велосипед',
-        target_amount: 30000
-      })
+      const goalResponses = []
+      goalResponses.push(
+        await api.post('/api/v1/savings/goals', {
+          title: 'Новый велосипед',
+          target_amount: 30000
+        })
+      )
+      goalResponses.push(
+        await api.post('/api/v1/savings/goals', {
+          title: 'Планшет',
+          target_amount: 25000
+        })
+      )
 
-      await api.post('/api/v1/game/savings/goals', {
-        title: 'Планшет',
-        target_amount: 25000
-      })
+      const createdGoals = goalResponses.map((res) => res.data).filter(Boolean)
 
-      // Make deposits
-      await api.post('/api/v1/game/savings/goals/1/deposit', {
-        amount: 15000
-      })
+      // Make deposits в первую цель, если она есть
+      if (createdGoals.length > 0 && createdGoals[0].id) {
+        await api.post('/api/v1/savings/deposit', {
+          goal_id: createdGoals[0].id,
+          amount: 15000
+        })
+      }
 
       // Complete quizzes
-      const quizzesResponse = await api.get('/api/v1/education/quizzes')
-      const quizzes = quizzesResponse.data.quizzes || []
+      const quizzesResponse = await api.get('/api/v1/quizzes')
+      const quizzes = quizzesResponse.data.quizzes || quizzesResponse.data || []
       
       for (const quiz of quizzes.slice(0, 3)) {
-        const questionsResponse = await api.get(`/api/v1/education/quizzes/${quiz.id}/questions`)
+        const questionsResponse = await api.get(`/api/v1/quizzes/${quiz.id}/questions`)
         const questions = questionsResponse.data.questions || []
         
         const answers = questions.map((q: any) => ({
@@ -112,7 +121,7 @@ export default function DemoPage() {
           answer: q.correct_answer
         }))
 
-        await api.post(`/api/v1/education/quizzes/${quiz.id}/submit`, {
+        await api.post(`/api/v1/quizzes/${quiz.id}/submit`, {
           answers
         })
       }
