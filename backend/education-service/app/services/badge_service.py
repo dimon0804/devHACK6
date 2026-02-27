@@ -70,6 +70,39 @@ class BadgeService:
                     badge = db.query(Badge).filter(Badge.id == badge_id).first()
                     return badge
             
+            elif condition.get('type') == 'quizzes_completed':
+                # Check if user completed all required quizzes
+                required_quiz_ids = condition.get('quiz_ids', [])
+                if not required_quiz_ids:
+                    continue
+                
+                # Check user's completed quizzes
+                from app.models.quiz import QuizProgress
+                completed_quizzes = db.query(QuizProgress).filter(
+                    QuizProgress.user_id == user_id,
+                    QuizProgress.completed == True,
+                    QuizProgress.quiz_id.in_(required_quiz_ids)
+                ).all()
+                
+                completed_quiz_ids = {q.quiz_id for q in completed_quizzes}
+                required_set = set(required_quiz_ids)
+                
+                # If all required quizzes are completed, award badge
+                if completed_quiz_ids >= required_set:
+                    from datetime import datetime
+                    user_badge = UserBadge(
+                        user_id=user_id,
+                        badge_id=badge_id,
+                        earned_at=datetime.utcnow()
+                    )
+                    db.add(user_badge)
+                    db.commit()
+                    db.refresh(user_badge)
+                    
+                    # Return badge object
+                    badge = db.query(Badge).filter(Badge.id == badge_id).first()
+                    return badge
+            
             elif condition.get('type') == 'goal_completed':
                 # Award badge for completing any goal
                 from datetime import datetime

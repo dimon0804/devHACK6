@@ -41,7 +41,9 @@ async def root():
             "badges": "/api/v1/badges",
             "guided": "/api/v1/guided",
             "achievements": "/api/v1/achievements",
-            "daily-challenges": "/api/v1/daily-challenges"
+            "daily-challenges": "/api/v1/daily-challenges",
+            "admin": "/api/v1/admin",
+            "analytics": "/api/v1/analytics"
         }
     }
 

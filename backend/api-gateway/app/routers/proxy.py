@@ -18,6 +18,8 @@ SERVICE_ROUTES = {
     "guided": settings.EDUCATION_SERVICE_URL,
     "achievements": settings.EDUCATION_SERVICE_URL,
     "daily-challenges": settings.EDUCATION_SERVICE_URL,
+    "admin": settings.ADMIN_SERVICE_URL,
+    "analytics": settings.ANALYTICS_SERVICE_URL,
 }
 
 
@@ -41,6 +43,18 @@ async def _proxy_request(service: str, path: str, request: Request):
             url = f"{base_url}/api/v1/{service}/{path}"
         else:
             url = f"{base_url}/api/v1/{service}"
+    elif service == "admin":
+        # Admin service endpoints are under /api/v1/admin/
+        if path:
+            url = f"{base_url}/api/v1/admin/{path}"
+        else:
+            url = f"{base_url}/api/v1/admin"
+    elif service == "analytics":
+        # Analytics service endpoints are under /api/v1/analytics/
+        if path:
+            url = f"{base_url}/api/v1/analytics/{path}"
+        else:
+            url = f"{base_url}/api/v1/analytics"
     else:
         # For categories, budget, savings - they're already under /api/v1 in game-service
         if path:

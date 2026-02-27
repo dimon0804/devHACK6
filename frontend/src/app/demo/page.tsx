@@ -166,10 +166,10 @@ export default function DemoPage() {
               <Sparkles className="text-primary" size={48} />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary-400 bg-clip-text text-transparent">
-              Демо-режим FinTeen
+              {t('demo.title')}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400">
-              Ознакомьтесь с платформой на примере предзаполненного аккаунта
+              {t('demo.subtitle')}
             </p>
           </motion.div>
 
@@ -179,14 +179,14 @@ export default function DemoPage() {
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                   <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
                 </div>
-                <h3 className="text-xl font-bold">Предзаполненные данные</h3>
+                <h3 className="text-xl font-bold">{t('demo.prefilledTitle')}</h3>
               </div>
               <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-                <li>• Баланс: 50 000 ₽</li>
-                <li>• 5 планов бюджета</li>
-                <li>• 2 цели накоплений</li>
-                <li>• 3 пройденных квиза</li>
-                <li>• Уровень 5+</li>
+                <li>• {t('demo.prefilledBalance')}</li>
+                <li>• {t('demo.prefilledBudgets')}</li>
+                <li>• {t('demo.prefilledGoals')}</li>
+                <li>• {t('demo.prefilledQuizzes')}</li>
+                <li>• {t('demo.prefilledLevel')}</li>
               </ul>
             </Card>
 
@@ -195,45 +195,45 @@ export default function DemoPage() {
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <TrendingUp className="text-blue-600 dark:text-blue-400" size={24} />
                 </div>
-                <h3 className="text-xl font-bold">Полная статистика</h3>
+                <h3 className="text-xl font-bold">{t('demo.fullStatsTitle')}</h3>
               </div>
               <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-                <li>• История транзакций</li>
-                <li>• Графики доходов/расходов</li>
-                <li>• Финансовый рейтинг</li>
-                <li>• Достижения и бейджи</li>
-                <li>• Прогресс по квизам</li>
+                <li>• {t('demo.fullStatsHistory')}</li>
+                <li>• {t('demo.fullStatsCharts')}</li>
+                <li>• {t('demo.fullStatsRating')}</li>
+                <li>• {t('demo.fullStatsBadges')}</li>
+                <li>• {t('demo.fullStatsQuizzes')}</li>
               </ul>
             </Card>
           </div>
 
           <Card className="p-8 mb-8">
-            <h2 className="text-2xl font-bold mb-4">Что вы увидите:</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('demo.sectionWhatYouSee')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-start gap-3">
                 <Target className="text-primary mt-1" size={20} />
                 <div>
-                  <h4 className="font-semibold mb-1">Планирование бюджета</h4>
+                  <h4 className="font-semibold mb-1">{t('demo.seeBudgetTitle')}</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Примеры сбалансированных и несбалансированных бюджетов
+                    {t('demo.seeBudgetDesc')}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Trophy className="text-primary mt-1" size={20} />
                 <div>
-                  <h4 className="font-semibold mb-1">Достижения</h4>
+                  <h4 className="font-semibold mb-1">{t('demo.seeAchievementsTitle')}</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Полученные бейджи и достижения за активность
+                    {t('demo.seeAchievementsDesc')}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <TrendingUp className="text-primary mt-1" size={20} />
                 <div>
-                  <h4 className="font-semibold mb-1">Аналитика</h4>
+                  <h4 className="font-semibold mb-1">{t('demo.seeAnalyticsTitle')}</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Графики, статистика и финансовый профиль
+                    {t('demo.seeAnalyticsDesc')}
                   </p>
                 </div>
               </div>
@@ -248,10 +248,10 @@ export default function DemoPage() {
               disabled={loading}
               className="px-8 py-4 text-lg"
             >
-              {loading ? 'Создание демо-аккаунта...' : 'Запустить демо-режим'}
+              {loading ? t('demo.buttonCreating') : t('demo.buttonStartDemo')}
             </Button>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-              Будет создан временный аккаунт с предзаполненными данными
+              {t('demo.note')}
             </p>
           </div>
         </div>

@@ -29,31 +29,31 @@ export default function Home() {
   const features = [
     {
       icon: Target,
-      title: 'Планирование бюджета',
-      description: 'Учитесь распределять доходы по категориям и создавать сбалансированный бюджет',
+      title: t('landing.featureBudgetTitle'),
+      description: t('landing.featureBudgetDesc'),
     },
     {
       icon: TrendingUp,
-      title: 'Цели накоплений',
-      description: 'Ставьте финансовые цели и учитесь копить, получая проценты на вклад',
+      title: t('landing.featureSavingsTitle'),
+      description: t('landing.featureSavingsDesc'),
     },
     {
       icon: Award,
-      title: 'Система уровней',
-      description: 'Зарабатывайте XP за правильные решения и повышайте свой уровень',
+      title: t('landing.featureLevelsTitle'),
+      description: t('landing.featureLevelsDesc'),
     },
     {
       icon: Shield,
-      title: 'Безопасная среда',
-      description: 'Виртуальные деньги и безопасное пространство для обучения',
+      title: t('landing.featureSafeTitle'),
+      description: t('landing.featureSafeDesc'),
     },
   ]
 
   const benefits = [
-    'Интерактивные сценарии',
-    'Геймификация обучения',
-    'Отслеживание прогресса',
-    'Персонализированный опыт',
+    t('landing.benefitInteractive'),
+    t('landing.benefitGamification'),
+    t('landing.benefitTracking'),
+    t('landing.benefitPersonal'),
   ]
 
   return (
@@ -114,14 +114,14 @@ export default function Home() {
                   onClick={() => router.push('/auth/register')}
                   className="text-lg px-8 py-4"
                 >
-                  Начать бесплатно
+                  {t('landing.ctaStartFree')}
                 </Button>
                 <Button
                   size="lg"
                   variant="secondary"
                   onClick={() => router.push('/about')}
                 >
-                  Узнать больше
+                  {t('landing.ctaLearnMore')}
                 </Button>
               </motion.div>
             </motion.div>
@@ -140,9 +140,9 @@ export default function Home() {
               className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16"
             >
               {[
-                { value: '10K+', label: 'Активных пользователей' },
-                { value: '50K+', label: 'Выполненных заданий' },
-                { value: '95%', label: 'Довольных пользователей' },
+                { value: '10K+', label: t('landing.statActiveUsers') },
+                { value: '50K+', label: t('landing.statCompletedTasks') },
+                { value: '95%', label: t('landing.statHappyUsers') },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -174,10 +174,10 @@ export default function Home() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Что вы получите
+                {t('landing.whatYouGetTitle')}
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400">
-                Все инструменты для изучения финансовой грамотности
+                {t('landing.whatYouGetSubtitle')}
               </p>
             </motion.div>
 
@@ -217,11 +217,10 @@ export default function Home() {
                 variants={fadeInUp}
               >
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                  Почему выбирают FinTeen?
+                  {t('landing.whyChooseTitle')}
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-                  Современная платформа для изучения финансовой грамотности с
-                  игровыми механиками и безопасной средой
+                  {t('landing.whyChooseText')}
                 </p>
                 <ul className="space-y-4">
                   {benefits.map((benefit, index) => (
@@ -261,7 +260,7 @@ export default function Home() {
                       <div>
                         <div className="text-3xl font-bold">10,000+</div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Довольных пользователей
+                          {t('landing.statHappyUsers')}
                         </div>
                       </div>
                     </div>
@@ -288,11 +287,10 @@ export default function Home() {
             >
               <Card glow>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Готовы начать обучение?
+                  {t('landing.ctaSectionTitle')}
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-                  Создайте аккаунт и начните свой путь к финансовой грамотности
-                  уже сегодня
+                  {t('landing.ctaSectionText')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
@@ -300,14 +298,14 @@ export default function Home() {
                     variant="primary"
                     onClick={() => router.push('/auth/register')}
                   >
-                    Создать аккаунт
+                  {t('landing.ctaCreateAccount')}
                   </Button>
                   <Button
                     size="lg"
                     variant="secondary"
                     onClick={() => router.push('/auth/login')}
                   >
-                    Войти
+                  {t('landing.ctaLogin')}
                   </Button>
                   <Button
                     size="lg"
@@ -316,7 +314,7 @@ export default function Home() {
                     className="border-2 border-primary/30 hover:border-primary/50"
                   >
                     <Sparkles size={18} className="mr-2" />
-                    Демо-режим
+                  {t('landing.ctaDemo')}
                   </Button>
                 </div>
               </Card>

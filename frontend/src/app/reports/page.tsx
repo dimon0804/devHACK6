@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Download, FileText } from 'lucide-react'
 import api from '@/lib/api'
 import { Card } from '@/components/ui/Card'
@@ -11,7 +12,8 @@ import { formatBalanceNumber, toNumber } from '@/lib/utils'
 
 export default function ReportsPage() {
   const router = useRouter()
-  const [username, setUsername] = useState('Пользователь')
+  const { t } = useTranslation()
+  const [username, setUsername] = useState('')
   const [transactions, setTransactions] = useState<any[]>([])
   const [goals, setGoals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,7 +28,7 @@ export default function ReportsPage() {
           api.get('/api/v1/transactions', { params: { page: 1, page_size: 100 } }),
           api.get('/api/v1/savings/goals'),
         ])
-        setUsername(userRes.data?.username || 'Пользователь')
+        setUsername(userRes.data?.username || '')
         setTransactions(txRes.data?.transactions || [])
         setGoals(goalsRes.data || [])
       } finally {
@@ -61,11 +63,11 @@ export default function ReportsPage() {
           <div className="flex items-center justify-between mb-6">
             <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')}>
               <ArrowLeft size={18} className="mr-2" />
-              Назад
+              {t('reports.back')}
             </Button>
             <Button variant="primary" size="sm" onClick={() => window.print()}>
               <Download size={16} className="mr-2" />
-              Экспорт в PDF
+              {t('reports.exportPdf')}
             </Button>
           </div>
 
@@ -75,27 +77,42 @@ export default function ReportsPage() {
                 <FileText className="text-primary" size={24} />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold">Финансовый отчет FinTeen</h1>
+                <h1 className="text-2xl md:text-3xl font-bold">{t('reports.title')}</h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Пользователь: {username} | Дата: {new Date().toLocaleDateString('ru-RU')}
+                  {t('reports.userLine', {
+                    username: username || t('common.username', { defaultValue: 'User' }),
+                    date: new Date().toLocaleDateString(),
+                  })}
                 </p>
               </div>
             </div>
 
             {loading ? (
-              <div className="py-10 text-center text-gray-500">Собираем данные...</div>
+              <div className="py-10 text-center text-gray-500">{t('reports.loading')}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card><div className="text-sm text-gray-500">Всего доходов</div><div className="text-2xl font-bold text-green-600">{formatBalanceNumber(report.income)} ₽</div></Card>
-                <Card><div className="text-sm text-gray-500">Всего расходов</div><div className="text-2xl font-bold text-red-500">{formatBalanceNumber(report.expenses)} ₽</div></Card>
-                <Card><div className="text-sm text-gray-500">Норма сбережений</div><div className="text-2xl font-bold">{report.savingsRate}%</div></Card>
-                <Card><div className="text-sm text-gray-500">Достигнутые цели</div><div className="text-2xl font-bold">{report.completedGoals}/{report.totalGoals}</div></Card>
+                <Card>
+                  <div className="text-sm text-gray-500">{t('reports.totalIncome')}</div>
+                  <div className="text-2xl font-bold text-green-600">{formatBalanceNumber(report.income)} ₽</div>
+                </Card>
+                <Card>
+                  <div className="text-sm text-gray-500">{t('reports.totalExpenses')}</div>
+                  <div className="text-2xl font-bold text-red-500">{formatBalanceNumber(report.expenses)} ₽</div>
+                </Card>
+                <Card>
+                  <div className="text-sm text-gray-500">{t('reports.savingsRate')}</div>
+                  <div className="text-2xl font-bold">{report.savingsRate}%</div>
+                </Card>
+                <Card>
+                  <div className="text-sm text-gray-500">{t('reports.completedGoals')}</div>
+                  <div className="text-2xl font-bold">
+                    {report.completedGoals}/{report.totalGoals}
+                  </div>
+                </Card>
                 <Card className="md:col-span-2">
-                  <h3 className="font-semibold mb-2">Краткий вывод</h3>
+                  <h3 className="font-semibold mb-2">{t('reports.summaryTitle')}</h3>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    {report.savingsRate >= 20
-                      ? 'Финансовое поведение устойчивое: ребенок сохраняет хороший баланс между расходами и накоплениями.'
-                      : 'Рекомендуется усилить привычку накоплений и сократить импульсивные траты в ежедневных сценариях.'}
+                    {report.savingsRate >= 20 ? t('reports.summaryPositive') : t('reports.summaryNegative')}
                   </p>
                 </Card>
               </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Shield, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
 import api from '@/lib/api'
@@ -24,8 +25,9 @@ type Goal = {
 
 export default function ParentModePage() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
-  const [childName, setChildName] = useState('Ребенок')
+  const [childName, setChildName] = useState('')
   const [transactions, setTransactions] = useState<Tx[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [quizProgress, setQuizProgress] = useState<any[]>([])
@@ -40,7 +42,7 @@ export default function ParentModePage() {
           api.get('/api/v1/savings/goals'),
         ])
 
-        setChildName(userRes.data?.username || 'Ребенок')
+        setChildName(userRes.data?.username || '')
         setTransactions(txRes.data?.transactions || [])
         setGoals(goalsRes.data || [])
 
@@ -82,10 +84,10 @@ export default function ParentModePage() {
 
   const recommendations = useMemo(() => {
     const tips: string[] = []
-    if (stats.riskScore > 75) tips.push('Высокая доля трат. Рекомендуем лимиты по категориям и правило 20% на накопления.')
-    if (stats.goalsProgress < 40) tips.push('Мало завершенных целей. Попробуйте ставить небольшие и короткие цели.')
-    if (stats.quizDone < 3) tips.push('Пройдено мало квизов. Добавьте 1-2 квиза в неделю для роста финансового IQ.')
-    if (tips.length === 0) tips.push('Отличная динамика. Можно переходить к более сложным сценариям бюджета и вклада.')
+    if (stats.riskScore > 75) tips.push(t('parentMode.recHighRisk'))
+    if (stats.goalsProgress < 40) tips.push(t('parentMode.recLowGoals'))
+    if (stats.quizDone < 3) tips.push(t('parentMode.recLowQuizzes'))
+    if (tips.length === 0) tips.push(t('parentMode.recGood'))
     return tips
   }, [stats])
 
@@ -95,7 +97,7 @@ export default function ParentModePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')} className="mb-6">
             <ArrowLeft size={18} className="mr-2" />
-            Назад
+            {t('common.back')}
           </Button>
 
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
@@ -104,8 +106,10 @@ export default function ParentModePage() {
                 <Shield className="text-blue-500" size={28} />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold">Родительский режим</h1>
-                <p className="text-gray-600 dark:text-gray-400">Контроль прогресса: {childName}</p>
+                <h1 className="text-3xl md:text-4xl font-bold">{t('parentMode.title')}</h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {t('parentMode.subtitle', { name: childName || t('common.username', { defaultValue: 'User' }) })}
+                </p>
               </div>
             </div>
 
@@ -114,32 +118,61 @@ export default function ParentModePage() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <Card><div className="text-sm text-gray-500">Доход</div><div className="text-2xl font-bold text-green-600">{formatBalanceNumber(stats.income)} ₽</div></Card>
-                  <Card><div className="text-sm text-gray-500">Расход</div><div className="text-2xl font-bold text-red-500">{formatBalanceNumber(stats.expenses)} ₽</div></Card>
-                  <Card><div className="text-sm text-gray-500">Цели</div><div className="text-2xl font-bold">{stats.completedGoals}/{stats.totalGoals}</div></Card>
-                  <Card><div className="text-sm text-gray-500">Квизы</div><div className="text-2xl font-bold">{stats.quizDone}</div></Card>
+                  <Card>
+                    <div className="text-sm text-gray-500">{t('parentMode.income')}</div>
+                    <div className="text-2xl font-bold text-green-600">{formatBalanceNumber(stats.income)} ₽</div>
+                  </Card>
+                  <Card>
+                    <div className="text-sm text-gray-500">{t('parentMode.expense')}</div>
+                    <div className="text-2xl font-bold text-red-500">{formatBalanceNumber(stats.expenses)} ₽</div>
+                  </Card>
+                  <Card>
+                    <div className="text-sm text-gray-500">{t('parentMode.goals')}</div>
+                    <div className="text-2xl font-bold">
+                      {stats.completedGoals}/{stats.totalGoals}
+                    </div>
+                  </Card>
+                  <Card>
+                    <div className="text-sm text-gray-500">{t('parentMode.quizzes')}</div>
+                    <div className="text-2xl font-bold">{stats.quizDone}</div>
+                  </Card>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   <Card>
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <TrendingUp size={18} className="text-primary" />
-                      Индикаторы поведения
+                      {t('parentMode.indicatorsTitle')}
                     </h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between text-sm"><span>Дисциплина</span><span className="font-semibold">{stats.disciplineScore}%</span></div>
-                      <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700"><div className="h-2 rounded-full bg-green-500" style={{ width: `${stats.disciplineScore}%` }} /></div>
-                      <div className="flex justify-between text-sm"><span>Риск</span><span className="font-semibold">{stats.riskScore}%</span></div>
-                      <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700"><div className="h-2 rounded-full bg-orange-500" style={{ width: `${stats.riskScore}%` }} /></div>
-                      <div className="flex justify-between text-sm"><span>Прогресс целей</span><span className="font-semibold">{stats.goalsProgress}%</span></div>
-                      <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700"><div className="h-2 rounded-full bg-primary" style={{ width: `${stats.goalsProgress}%` }} /></div>
+                      <div className="flex justify-between text-sm">
+                        <span>{t('parentMode.discipline')}</span>
+                        <span className="font-semibold">{stats.disciplineScore}%</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                        <div className="h-2 rounded-full bg-green-500" style={{ width: `${stats.disciplineScore}%` }} />
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>{t('parentMode.risk')}</span>
+                        <span className="font-semibold">{stats.riskScore}%</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                        <div className="h-2 rounded-full bg-orange-500" style={{ width: `${stats.riskScore}%` }} />
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>{t('parentMode.goalsProgress')}</span>
+                        <span className="font-semibold">{stats.goalsProgress}%</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                        <div className="h-2 rounded-full bg-primary" style={{ width: `${stats.goalsProgress}%` }} />
+                      </div>
                     </div>
                   </Card>
 
                   <Card>
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <AlertTriangle size={18} className="text-orange-500" />
-                      Рекомендации родителю
+                      {t('parentMode.recommendationsTitle')}
                     </h3>
                     <ul className="space-y-3">
                       {recommendations.map((tip, i) => (
