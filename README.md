@@ -112,10 +112,14 @@ docker-compose logs -f
 - **API Gateway**: http://localhost:8000
 - **Adminer** (БД): http://localhost:8080
 - **Swagger документация**:
+  - API Gateway: http://localhost:8000/docs
   - Auth Service: http://localhost:8001/docs
   - User Service: http://localhost:8002/docs
   - Game Service: http://localhost:8003/docs
   - Progress Service: http://localhost:8004/docs
+  - Education Service: http://localhost:8005/docs
+  - Admin Service: http://localhost:8010/docs
+  - Analytics Service: http://localhost:8011/docs
 
 ## 📦 Структура проекта
 
@@ -130,14 +134,32 @@ docker-compose logs -f
 │   ├── auth-service/          # Сервис аутентификации
 │   ├── user-service/          # Сервис пользователей
 │   ├── game-service/          # Игровая логика
-│   └── progress-service/      # Прогресс и транзакции
+│   ├── progress-service/      # Прогресс и транзакции
+│   ├── education-service/     # Образовательный модуль
+│   ├── admin-service/         # Админ-панель
+│   └── analytics-service/      # Аналитика
 └── frontend/                   # Next.js приложение
     ├── src/
     │   ├── app/               # App Router страницы
+    │   │   ├── dashboard/     # Дашборд
+    │   │   ├── budget/        # Планирование бюджета
+    │   │   ├── savings/       # Накопления
+    │   │   ├── quizzes/       # Квизы
+    │   │   ├── badges/        # Бейджи
+    │   │   ├── achievements/  # Достижения
+    │   │   ├── history/       # История транзакций
+    │   │   ├── demo/          # Демо-режим
+    │   │   ├── parent/        # Родительский режим
+    │   │   ├── reports/       # Отчеты
+    │   │   ├── deposit-simulator/ # Симулятор вклада
+    │   │   └── admin/         # Админ-панель
     │   ├── components/        # React компоненты
+    │   │   ├── ui/            # UI-kit компоненты
+    │   │   ├── layout/        # Layout компоненты
+    │   │   └── onboarding/    # Onboarding
     │   ├── lib/               # Утилиты, API клиент
     │   ├── store/             # Zustand state management
-    │   └── locales/           # i18n переводы
+    │   └── locales/           # i18n переводы (ru.json, en.json)
 ```
 
 Каждый backend сервис имеет структуру:
@@ -316,39 +338,117 @@ service-name/
 
 ## 📈 API Endpoints
 
-### Auth Service
+**Все запросы проходят через API Gateway**: `http://localhost:8000/api/v1/{service}/{endpoint}`
+
+**Аутентификация**: Все защищенные endpoints требуют заголовок `Authorization: Bearer <access_token>`
+
+### Auth Service (`/api/v1/auth`)
 
 - `POST /api/v1/auth/register` - Регистрация нового пользователя
+  - Body: `{email, username, password}`
+  - Response: `{access_token, refresh_token, user}`
 - `POST /api/v1/auth/login` - Вход в систему
+  - Body: `{email, password}`
+  - Response: `{access_token, refresh_token, user}`
 - `POST /api/v1/auth/refresh` - Обновление access токена
-- `GET /api/v1/auth/me` - Информация о текущем пользователе
+  - Body: `{refresh_token}`
+  - Response: `{access_token, refresh_token}`
+- `GET /api/v1/auth/me` - Информация о текущем пользователе (требует токен)
 
-### User Service
+### User Service (`/api/v1/users`)
 
-- `GET /api/v1/users/me` - Получение профиля
-- `PUT /api/v1/users/me` - Обновление профиля
-- `POST /api/v1/users/balance` - Изменение баланса (положительное/отрицательное)
-- `POST /api/v1/users/xp` - Добавление XP
-- `GET /api/v1/users/me/level` - Информация об уровне и прогрессе
+- `GET /api/v1/users/me` - Получение профиля (требует токен)
+- `PUT /api/v1/users/me` - Обновление профиля (требует токен)
+  - Body: `{username?, email?}`
+- `POST /api/v1/users/balance` - Изменение баланса (требует токен)
+  - Body: `{amount}` (положительное/отрицательное)
+- `POST /api/v1/users/xp` - Добавление XP (требует токен)
+  - Body: `{xp}` (положительное число)
+- `GET /api/v1/users/me/level` - Информация об уровне и прогрессе (требует токен)
 
-### Game Service
+### Game Service (`/api/v1/budget`, `/api/v1/savings`)
 
-- `POST /api/v1/budget/plan` - Планирование бюджета (доход + категории)
-- `POST /api/v1/savings/goals` - Создание цели накопления
-- `GET /api/v1/savings/goals` - Список целей пользователя
-- `POST /api/v1/savings/deposit` - Пополнение цели
-- `POST /api/v1/savings/interest/{goal_id}` - Применение процентов к цели
+- `POST /api/v1/budget/plan` - Планирование бюджета (требует токен)
+  - Body: `{income, categories: [{name, amount}]}`
+  - Response: `{success, xp_reward, feedback, balance_updated}`
+- `POST /api/v1/savings/goals` - Создание цели накопления (требует токен)
+  - Body: `{title, target_amount}`
+  - Response: `{id, title, target_amount, current_amount, completed}`
+- `GET /api/v1/savings/goals` - Список целей пользователя (требует токен)
+- `POST /api/v1/savings/deposit` - Пополнение цели (требует токен)
+  - Body: `{goal_id, amount}`
+  - Response: `{success, goal, balance_updated}`
+- `POST /api/v1/savings/interest/{goal_id}` - Применение процентов к цели (требует токен)
+  - Response: `{success, interest_amount, goal}`
 
-### Progress Service
+### Progress Service (`/api/v1/transactions`, `/api/v1/quests`)
 
-- `POST /api/v1/transactions` - Создание транзакции (автоматически при операциях)
-- `GET /api/v1/transactions` - История транзакций (с пагинацией)
-  - Query params: `page`, `page_size`
+- `POST /api/v1/transactions` - Создание транзакции (требует токен)
+  - Body: `{type, amount, description}`
+  - Types: `income`, `expense`, `savings_deposit`, `interest`, `goal_completed`
+- `GET /api/v1/transactions` - История транзакций (требует токен)
+  - Query params: `page` (default: 1), `page_size` (default: 10, max: 100)
+  - Response: `{transactions: [], total, page, page_size}`
 - `GET /api/v1/quests` - Список доступных квестов
-- `GET /api/v1/quests/progress` - Прогресс пользователя по квестам
-- `POST /api/v1/quests/progress` - Обновление прогресса по квесту
+- `GET /api/v1/quests/progress` - Прогресс пользователя по квестам (требует токен)
+- `POST /api/v1/quests/progress` - Обновление прогресса по квесту (требует токен)
+  - Body: `{quest_id, completed, score}`
 
-**Все запросы проходят через API Gateway**: `http://localhost:8000/api/v1/{service}/{endpoint}`
+### Education Service (`/api/v1/quizzes`, `/api/v1/badges`, `/api/v1/achievements`, `/api/v1/daily-challenges`, `/api/v1/guided`)
+
+#### Quizzes
+- `GET /api/v1/quizzes` - Список всех доступных квизов
+  - Response: `[{id, title, difficulty, xp_reward}]`
+- `GET /api/v1/quizzes/{quiz_id}` - Детали квиза с вопросами (требует токен)
+  - Response: `{id, title, questions: [{id, question, options}]}` (без правильных ответов)
+- `POST /api/v1/quizzes/{quiz_id}/submit` - Отправка ответов на квиз (требует токен)
+  - Body: `{answers: [{question_id, answer}]}`
+  - Response: `{score, xp_reward, badge_awarded?, achievement_awarded?}`
+- `GET /api/v1/quizzes/progress` - Прогресс пользователя по квизам (требует токен)
+  - Response: `[{quiz_id, score, completed}]`
+
+#### Badges
+- `GET /api/v1/badges` - Все бейджи и полученные пользователем (требует токен)
+  - Response: `{badges: [], user_badges: [badge_ids]}`
+- `GET /api/v1/badges/my` - Полученные бейджи пользователя (требует токен)
+  - Response: `[{badge_id, title, description, icon, unlocked_at}]`
+- `POST /api/v1/badges/check` - Проверка и награждение бейджа (требует токен, внутренний)
+  - Body: `{badge_type, condition: {}}`
+  - Используется другими сервисами для проверки условий
+
+#### Achievements
+- `GET /api/v1/achievements` - Все достижения и разблокированные пользователем (требует токен)
+  - Response: `{achievements: [], user_achievements: [achievement_ids]}`
+- `GET /api/v1/achievements/my` - Разблокированные достижения пользователя (требует токен)
+  - Response: `[{achievement_id, title, description, icon, unlocked_at}]`
+- `POST /api/v1/achievements/check` - Проверка и награждение достижения (требует токен, внутренний)
+  - Body: `{achievement_type, condition: {}}`
+
+#### Daily Challenges
+- `GET /api/v1/daily-challenges/today` - Сегодняшний челлендж (требует токен)
+  - Response: `{challenge: {}, user_progress: {completed_at?}}`
+- `POST /api/v1/daily-challenges/check` - Проверка выполнения челленджа (требует токен)
+  - Body: `{challenge_type, condition_data: {}}`
+  - Response: `{completed: bool, challenge?: {}}`
+
+#### Guided Mode
+- `GET /api/v1/guided/steps` - Список шагов обучения (требует токен)
+  - Response: `[{id, title, description, completed}]`
+- `GET /api/v1/guided/steps/{step_id}` - Детали шага (требует токен)
+
+### Admin Service (`/api/v1/admin`)
+
+- `GET /api/v1/admin/dashboard` - Статистика платформы (требует admin token)
+  - Query param: `token` (admin secret key)
+  - Response: `{users: {}, transactions: {}, quizzes: {}, goals: {}, analytics: {}}`
+- `GET /api/v1/admin/stats` - Детальная статистика (требует admin token)
+
+### Analytics Service (`/api/v1/analytics`)
+
+- `POST /api/v1/analytics/events` - Логирование события (внутренний)
+  - Body: `{event_type, event_category?, event_data: {}}`
+- `GET /api/v1/analytics/events` - Получение событий (требует admin token)
+  - Query params: `event_type?`, `start_date?`, `end_date?`
 
 ## 🎯 Как это работает
 
